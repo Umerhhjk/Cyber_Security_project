@@ -16,6 +16,32 @@ def Generate_Public_key():
 #--------------------------------------------------------------------------------------------
 
 
+#-------------------------- Helper Functions Start ---------------------------------------------
+
+def get_txt_file_data(): #for signing up, Username must be unique, it cant already exist in file
+  try:
+   with open(file_path, 'r') as userFile:
+      File_data=userFile.read()
+      return File_data
+  except FileNotFoundError:
+      return "File is empty"
+
+def get_All_Usernames(): #for signing up, Username must be unique, it cant already exist in file
+  
+  All_Usernames=[]
+  try:
+    with open(file_path, 'r') as userFile:
+      for line in userFile:
+        if("Username: " in line):
+           Username=line.replace("Username: ", "").strip() #Extract Username
+           All_Usernames.append(Username)
+  except FileNotFoundError:  
+     All_Usernames.append("File is Empty")       
+  return All_Usernames
+
+#-------------------------- Helper Functions END ---------------------------------------------
+
+
 #-------------------------- Create Account Procedure Start ------------------------------------
 def Save_Account_Info_in_file(toWrite):
   with open(file_path, 'a') as userfile:
@@ -69,14 +95,15 @@ def Check_In_File(Input_data):
   Username_to_check = f'Username: {Entered_Username}\n'
   Password_to_check = f'Password: {Entered_Password}\n'
 
-  with open(file_path, 'r') as userFile:
-    for line in userFile:
+  try:
+    with open(file_path, 'r') as userFile:
+      for line in userFile:
       
-      if "Account ID:" in line:
+        if "Account ID:" in line:
             This_Account_Id = line.split("Account ID: ")[1].strip().split()[0] #get this account ID to return if match found
             line= userFile.readline()   #Line now contains username
 
-      if(Username_to_check == line):
+        if(Username_to_check == line):
           userFile.readline()                 #skip email
           userFile.readline()                 #skip Account Balance
           this_password = userFile.readline()     #get password of this user
@@ -84,17 +111,16 @@ def Check_In_File(Input_data):
           if(Password_to_check == this_password):
             print('Login Successful')
             return This_Account_Id
-    
-    return "0"
+  except FileNotFoundError:
+      return "0"
+  return "0"
 #-------------------------- Login Procedure ENDS -------------------------------------------
 
 
 
 #-------------------------- Get Account Details Procedure STARTS ---------------------------
-
-
 def get_Details(Acount_Id):
-    Account_Details=["","",0,"","","",""]
+    Account_Details=["","","","","","",""]
 
     with open(file_path, 'r') as userFile:
       for line in userFile:
@@ -107,8 +133,7 @@ def get_Details(Acount_Id):
 
            line=userFile.readline()
            two_parts = line.split("Account Balance: ") #split into 2 parts "Account Balance: " and what follows
-           balance_string = two_parts[1].split()[0]       #further split second part into 2, and save first one as balance
-           Account_Details[2]= int(balance_string) #Extract Account Balance
+           Account_Details[2] = two_parts[1].split()[0]       #further split second part into 2, and save first one as balance
 
            line=userFile.readline()
            Account_Details[3]=line.replace("Password: ", "").strip() #Extract Password

@@ -1,26 +1,156 @@
-#pip install email-validator
-#install this if you havent already
-from email_validator import validate_email, EmailNotValidError
+#pip install email-validator (install this if you havent already)
 import tkinter
-
+from email_validator import validate_email, EmailNotValidError
 from Filing_logic import *
 
-#Font styles --------------------------------------------------
+
+X_cord=600   #these represent where to show window on screen
+Y_cord=130
+
+#styles --------------------------------------------------
 Main_Heading_font= ("Chiller", 45, "bold")
+Sub_Headings_font= ("Arial Black", 17, "bold")
 Other_Headings_font= ("Arial Black", 30, "bold")
 Simple_text_font= ("Arial", 15, "bold")
 Button_font1=("Arial Black", 20, "bold")
 Button_font2=("Arial Black", 15, "bold")
 Entry_label_font=("Arial", 15)
+Data_Display_font=("Arial", 10,"bold")
 Other_labels_font=("Arial", 18, "bold")
 
-#incomplete Functions --------------------------------------------------------------------------------------------------
+Basic_Button_style = {
+    "fg": "white",
+    "relief": "raised",
+    "borderwidth": 10,
+    "activebackground":"white",  # Hover background color
+    "activeforeground":"black"  # Hover text color
+}
 
+Button_style_1 = {
+    "font": Button_font1,
+    "width": 10,
+    "height": 1,
+}
+
+Button_style_2 = {
+    "font": Button_font2,
+    "width": 10,
+    "height": 2,
+}
+
+Button_style_3 = {
+    "font": Button_font2,
+    "width": 20,
+    "height": 2,
+}
+
+#styles END --------------------------------------------------
+
+
+#incomplete Functions --------------------------------------------------------------------------------------------------
+def Send_Money():
+    pass
+
+def Recieve_Money():
+    pass
+
+def Change_Password():
+    pass
+
+def Update_Balance():
+    pass
+
+#incomplete Functions END------------------------------------------------------------------------------------------------
+
+#Auxiliary Functions --------------------------------------------------------------------------------
+def login_to_Sign_up(login_Window):
+    login_Window.destroy()
+    Sign_Up_Function()
+
+
+def Sign_up_to_login(Signup_Window):
+    Signup_Window.destroy()
+    Login_Function()
+
+def main_to_Sign_up(MainWindow):
+    MainWindow.destroy()
+    Sign_Up_Function()
+
+def main_to_login(MainWindow):
+    MainWindow.destroy()
+    Login_Function()
+
+def Log_out(Account_Window):
+    Account_Window.destroy()
+    Login_Function()    
+
+def Create_User_Account(Singup_data):
+    ID=Create_Account(Singup_data)
+    Show_User_Account(ID)
+
+
+def Wrap_over_newline(mystring, limit=20): #this function makes sure the errors are wrapped with the frame, and dont overflow
+    words = mystring.split() 
+    current_length = 0
+    result = []
+    for word in words:
+        # If adding this word would exceed the limit, insert a newline
+        if current_length + len(word) > limit:
+            result.append('\n')
+            current_length = 0 
+        result.append(word) 
+        current_length += len(word) + 1  # accounting the space after the word
+
+    return ' '.join(result)  #rejoin with spaces
+
+#Auxiliary Functions END --------------------------------------------------------------------------------------------
+
+
+#Admin Window --------------------------------------------------------------------------------------------------------
+def Show_Admin_Account():
+    Admin_Account_Window = tkinter.Tk()
+    Admin_Account_Window.title("Admin Account") 
+    Admin_Account_Window.geometry(f"465x430+{X_cord}+{Y_cord}") 
+    Admin_Account_Window.config(bg="black")
+
+
+#User_Account Label
+    ID_label=tkinter.Label(Admin_Account_Window,font=Main_Heading_font, bg="black", fg="white" ,text="Welcome Admin") 
+    ID_label.grid(row=0,column=0,pady=(20,30))
+
+    Admin_frame=tkinter.LabelFrame(Admin_Account_Window,bg="black",  relief="flat") #relief="flat" sets visible boderwidth to 0
+    Admin_frame.grid(row=1,column=0 ,padx=20,pady=10)
+
+    Send_Money_button = tkinter.Button(Admin_frame, bg="#15aacb" , text="Display\nUser Info",command=Display_All_Users_Info, **Button_style_2,**Basic_Button_style)
+    Send_Money_button.grid(row=1,column=0,padx=25,pady=(20,10)) 
+
+    Recieve_Money_button = tkinter.Button(Admin_frame, bg="#13780a" , text="Update\nBalance",command=Update_Balance, **Button_style_2,**Basic_Button_style)
+    Recieve_Money_button.grid(row=1,column=1,padx=20,pady=(20,10)) 
+
+    Log_out_button = tkinter.Button(Admin_frame, bg="#901111", text="Log out",command=lambda: Log_out(Admin_Account_Window),**Button_style_2,**Basic_Button_style)
+    Log_out_button.grid(row=2,column=0,padx=20,pady=(20,10)) 
+
+
+def Display_All_Users_Info():
+     Display_File_Window = tkinter.Tk()
+     Display_File_Window.title("User Info") 
+
+     txt_data=get_txt_file_data() # get all the data in txt file
+
+     data_Display_label=tkinter.Label(Display_File_Window,font=Data_Display_font, fg="black" ,justify="left" ,text=txt_data)  # display the data in txt file
+     data_Display_label.grid(row=0,column=0)    
+     Display_File_Window.grid_rowconfigure(0, weight=1)
+     Display_File_Window.grid_columnconfigure(0, weight=1)    
+
+#--------------------------------- Admin WIndow ENDS -------------------------------------------------------------------
+
+
+#User Window --------------------------------------------------------------------------------------------------------
 def Show_User_Account(Acount_Id):
     # Creating the main window
     User_Account_Window = tkinter.Tk()
-    User_Account_Window.title("Login/Signup Window")  # Set the window title
-    User_Account_Window.geometry("550x430")  # Set the window size (width x height)
+    User_Account_Window.title("User Account")
+    User_Account_Window.geometry(f"465x475+{X_cord}+{Y_cord}")  
     User_Account_Window.config(bg="black")
 
     Account_Details=get_Details(str(Acount_Id)) # found in filing_logic.cpp
@@ -28,13 +158,30 @@ def Show_User_Account(Acount_Id):
     Username,Email,Account_Balance,Password,Public_Key,Private_Key,Acount_Id=Account_Details
     print(Account_Details)
 
-    Welcome_text="Welcome " + Username
+    balance_text="(Account Balance: " + Account_Balance + " Rs)"
 
 #User_Account Label
-    ID_label=tkinter.Label(User_Account_Window,font=Main_Heading_font, bg="black", fg="red" ,text=Welcome_text) 
-    ID_label.pack(pady=(10,30))
+    ID_label=tkinter.Label(User_Account_Window,font=Main_Heading_font, bg="black", fg="white" ,text=Username) 
+    ID_label.grid(row=0,column=0,pady=(15,15))
 
-#incomplete Functions END------------------------------------------------------------------------------------------------
+    Balance_label=tkinter.Label(User_Account_Window,font=Sub_Headings_font, bg="black", fg="white" ,text=balance_text) 
+    Balance_label.grid(row=1,column=0,pady=(30,10))
+
+    user_frame=tkinter.LabelFrame(User_Account_Window,bg="black",  relief="flat") #relief="flat" sets visible boderwidth to 0
+    user_frame.grid(row=2,column=0 ,padx=20,pady=10)
+
+    Send_Money_button = tkinter.Button(user_frame, bg="#15aacb" , text="Send\nMoney",command=Send_Money, **Button_style_2,**Basic_Button_style)
+    Send_Money_button.grid(row=2,column=0,padx=25,pady=(20,10)) 
+
+    Recieve_Money_button = tkinter.Button(user_frame, bg="#13780a" , text="Recieve\nMoney",command=Recieve_Money, **Button_style_2,**Basic_Button_style)
+    Recieve_Money_button.grid(row=2,column=1,padx=20,pady=(20,10)) 
+
+    Change_Password_button = tkinter.Button(user_frame, bg="#D8a616" , text="Change\nPassword",command=Change_Password, **Button_style_2,**Basic_Button_style)
+    Change_Password_button.grid(row=3,column=0,padx=20,pady=(20,10)) 
+
+    Log_out_button = tkinter.Button(user_frame, bg="#901111", text="Log out",command=lambda: Log_out(User_Account_Window),**Button_style_2,**Basic_Button_style)
+    Log_out_button.grid(row=3,column=1,padx=20,pady=(20,10)) 
+#User Window ENDS -------------------------------------------------------------------------------------------------------- END------------------------------------------------------------------------------------------------
 
 
 # Functions to remove or Add Placeholder text --------------------------------------------------
@@ -56,44 +203,11 @@ def on_focus_out(event, entry, placeholder_text):
 #----------------------------------------------------------------------------------------------------
 
 
-#Auxiliary Functions --------------------------------------------------------------------------------
-def login_to_Sign_up(login_Window):
-    login_Window.destroy()
-    Sign_Up_Function()
-
-
-def Sign_up_to_login(Signup_Window):
-    Signup_Window.destroy()
-    Login_Function()
-
-def main_to_Sign_up(MainWindow):
-    MainWindow.destroy()
-    Sign_Up_Function()
-
-def main_to_login(MainWindow):
-    MainWindow.destroy()
-    Login_Function()
-
-def Wrap_over_newline(mystring, limit=20): #this function makes sure the errors are wrapped with the frame, and dont overflow
-    words = mystring.split() 
-    current_length = 0
-    result = []
-    for word in words:
-        # If adding this word would exceed the limit, insert a newline
-        if current_length + len(word) > limit:
-            result.append('\n')
-            current_length = 0 
-        result.append(word) 
-        current_length += len(word) + 1  # accounting the space after the word
-
-    return ' '.join(result)  #rejoin with spaces
-# ---------------------------------------------------------------------------------------------------   
-
-#Signup data Validation ------------------------------------------------------------------------------------------
+#Login/Signup data Validation ------------------------------------------------------------------------------------------
 def Validate_Signup_data(Singup_data):
     entered_username, entered_email, entered_password, entered_confirm_password = Singup_data
 
-    file_usernames= "" #CORRECT THIS LATER
+    All_Usernames = get_All_Usernames() #extract all usernames that currently exist in file
 
     def Validade_Username():
         Validation_error=None
@@ -101,8 +215,10 @@ def Validate_Signup_data(Singup_data):
             Validation_error="Please Enter a Username." 
         elif(len(entered_username)<8):
             Validation_error="Username should be atleast 8 characters long." 
-        elif(entered_username in file_usernames):
-                Validation_error="Username Already Exists."
+        elif(len(entered_username)>20):
+            Validation_error="Username should be atmost 20 characters long."    
+        elif(entered_username in All_Usernames):
+                Validation_error="Username already in use. Choose a different Username."
         elif any(character in entered_username for character in ['#', '"', '\'','\n','!',':']):
             Validation_error="Username contains invalid characters."
         return Validation_error    
@@ -135,10 +251,6 @@ def Validate_Signup_data(Singup_data):
     ErrorList=[UsernameError,PasswordError,EmailError]
     return ErrorList
 
-#----------------------------------- Signup data Validation ENDS -------------------------------------------------------
-
-
-#----------------------------------- Login data Validation -------------------------------------------------------------
 def Validate_login_data(login_data):
     Account_Id=Check_In_File(login_data)      #function found in filing_logic.py it returns an id if account is found in file, otherwise returns "0"
 
@@ -150,23 +262,16 @@ def Validate_login_data(login_data):
      
     return Result
 
-#----------------------------------- Login data Validation ENDS --------------------------------------------------------
-
-
-
+#----------------------------------- Login/Signup data Validation ENDS -------------------------------------------------------
 
 
 # --------------------------- Sign Up window ---------------------------------------------------------------------------
-
-def Create_User_Account(Singup_data):
-    ID=Create_Account(Singup_data)
-    Show_User_Account(ID)
 
 def Sign_Up_Function():
    
    Signup_Window = tkinter.Tk()
    Signup_Window.title("Signup Window")  # Title forSignup_Window
-   Signup_Window.geometry("470x550")  # Size forSignup_Window
+   Signup_Window.geometry(f"465x550+{X_cord}+{Y_cord}")  # Size forSignup_Window
    Signup_Window.config(bg="black")  # Set background color ofSignup_Window
 
    name_placeholder = "Username"
@@ -197,7 +302,7 @@ def Sign_Up_Function():
    Confirm_entry.insert(0, Confirm_placeholder)
 
    # when the user clicks on the submit button, this field becomes visible and displays errors (if any)
-   Error_label=tkinter.Label(user_input_frame,font=Simple_text_font, fg="Red" ,text="")  
+   Error_label=tkinter.Label(user_input_frame,font=Simple_text_font, fg="Red",justify="left",text="")  
    Error_label.grid(row=5,column=0,pady=(10,10))    
 
    def Submit_Singup_data():      #nested functiion to get field values and display possible errors
@@ -227,10 +332,10 @@ def Sign_Up_Function():
             Signup_Window.destroy()
             Create_User_Account(Singup_data)   
 
-   Submit_button = tkinter.Button(user_input_frame,font=Button_font2 ,fg="white", bg="blue" , text="Sign up",command=Submit_Singup_data, width=13, height=2)
+   Submit_button = tkinter.Button(user_input_frame, bg="blue" , text="Sign up",command=Submit_Singup_data, **Button_style_2,**Basic_Button_style)
    Submit_button.grid(row=6,column=0,padx=(0,200),pady=(20,10)) 
 
-   login_instead_button = tkinter.Button(user_input_frame,font=Button_font2 ,fg="white", bg="Green" , text="Login Instead",command=lambda: Sign_up_to_login(Signup_Window), width=13, height=2)
+   login_instead_button = tkinter.Button(user_input_frame, bg="Green" , text="Login\nInstead",command=lambda: Sign_up_to_login(Signup_Window), **Button_style_2,**Basic_Button_style)
    login_instead_button.grid(row=6,column=0,padx=(200,0),pady=(20,10)) 
 
     #binding fields to the event when cursor is placed in input fields (basically handles placeholder values being displayed or not)
@@ -250,13 +355,12 @@ def Sign_Up_Function():
 # -------------------------------------Sign Up window ENDS ------------------------------------------------------------------
 
 
-
  # --------------------------- Login window ---------------------------------------------------------------------------
 def Login_Function():
    
    login_Window = tkinter.Tk()
    login_Window.title("Login Window")  # Title forlogin_Window
-   login_Window.geometry("470x450")  # Size forlogin_Window
+   login_Window.geometry(f"465x420+{X_cord}+{Y_cord}")  # Size forlogin_Window
    login_Window.config(bg="black")  # Set background color oflogin_Window
    
    name_placeholder = "Username"
@@ -265,19 +369,19 @@ def Login_Function():
    Welcomelabel=tkinter.Label(login_Window,font=Other_Headings_font, bg="black", fg="Red" ,text="Login") 
    Welcomelabel.grid(pady=(10,10))
    
-   user_input_frame=tkinter.LabelFrame(login_Window)
-   user_input_frame.grid(row=1,column=0 ,padx=20,pady=10)
+   login_frame=tkinter.LabelFrame(login_Window)
+   login_frame.grid(row=1,column=0 ,padx=20,pady=10)
 
-   name_entry=tkinter.Entry(user_input_frame,font=Entry_label_font, bg="white",fg="gray", width=35)
+   name_entry=tkinter.Entry(login_frame,font=Entry_label_font, bg="white",fg="gray", width=35)
    name_entry.grid(row=1,column=0, padx=10, pady=10, ipady=5,ipadx=5)
    name_entry.insert(0, name_placeholder)
 
-   Password_entry=tkinter.Entry(user_input_frame,font=Entry_label_font, bg="white",fg="gray", width=35)
+   Password_entry=tkinter.Entry(login_frame,font=Entry_label_font, bg="white",fg="gray", width=35)
    Password_entry.grid(row=2,column=0, padx=10, pady=10, ipady=5,ipadx=5)
    Password_entry.insert(0, password_placeholder)
 
    # when the user clicks on the submit button, this field becomes visible and displays errors (if any)
-   Error_label=tkinter.Label(user_input_frame,font=Simple_text_font, fg="Red" ,text="")  
+   Error_label=tkinter.Label(login_frame,font=Simple_text_font, fg="Red", justify="left",text="")  
    Error_label.grid(row=3,column=0,pady=(10,10))    
 
    def submit_login_data():  #nested functiion to get field values and display possible errors
@@ -285,6 +389,11 @@ def Login_Function():
             name_entry.get(),  
             Password_entry.get(),  
         ]
+
+        if(login_data[0]=="Username" and login_data[1]=="Password"): #Hardcoded Username and Password for admin.
+            login_Window.destroy()
+            Show_Admin_Account()
+            return None
 
         Acount_Id=0
         Validation_result = Validate_login_data(login_data)  #index 0 is error, index 1 is id
@@ -294,21 +403,18 @@ def Login_Function():
         else:
             Acount_Id=Validation_result[1]
         
-        if(len(error_text)>40):
-          error_text=Wrap_over_newline(error_text,40)
-
         if(error_text!=""):                    #if there is an error, display it
            Error_label.config(text=error_text)
         else:
             login_Window.destroy()
             Show_User_Account(int(Acount_Id))
 
-   Submit_button = tkinter.Button(user_input_frame,font=Button_font2 ,fg="white", bg="green" , text="Login", width=13, height=2,command=submit_login_data)
-   Submit_button.grid(row=4,column=0,padx=(0,200),pady=(60,10)) 
+   Submit_button = tkinter.Button(login_frame, bg="green" , text="Login",command=submit_login_data,**Button_style_2,**Basic_Button_style)
+   Submit_button.grid(row=4,column=0,padx=(0,200),pady=(20,10)) 
 
 
-   Sign_up_instead_button = tkinter.Button(user_input_frame,font=Button_font2 ,fg="white", bg="blue" , text="Sign up Instead",command=lambda:login_to_Sign_up(login_Window), width=13, height=2)
-   Sign_up_instead_button.grid(row=4,column=0,padx=(200,0),pady=(60,10))
+   Sign_up_instead_button = tkinter.Button(login_frame, bg="blue" , text="Sign up\nInstead",command=lambda:login_to_Sign_up(login_Window),**Button_style_2,**Basic_Button_style)
+   Sign_up_instead_button.grid(row=4,column=0,padx=(200,0),pady=(20,10))
 
    name_entry.bind("<FocusIn>", lambda event: on_focus_in(event, name_entry, name_placeholder))
    name_entry.bind("<FocusOut>", lambda event: on_focus_out(event, name_entry, name_placeholder))
@@ -323,25 +429,17 @@ def main():
 # Creating the main window
     MainWindow = tkinter.Tk()
     MainWindow.title("Login/Signup Window")  # Set the window title
-    MainWindow.geometry("550x430")  # Set the window size (width x height)
+    MainWindow.geometry(f"465x400+{X_cord}+{Y_cord}")  # Set the window size (width x height)
     MainWindow.config(bg="black")
 
 #main Label
     App_name_label=tkinter.Label(MainWindow,font=Main_Heading_font, bg="black", fg="red" ,text="Application Name") 
-    App_name_label.pack(pady=(10,30))
+    App_name_label.pack(pady=(10,45))
 
-#Sign_up Label and button
-    Sign_up_Message_label=tkinter.Label(MainWindow, font=Other_labels_font, bg="black",fg="white", text="New here? Sign up Today!") 
-    Sign_up_Message_label.pack(pady=(20,0))
+    Sign_up_button = tkinter.Button(MainWindow , bg="green", text="Sign up",command=lambda: main_to_Sign_up(MainWindow),**Button_style_1,**Basic_Button_style)
+    Sign_up_button.pack(pady=(15,10))
 
-    Sign_up_button = tkinter.Button(MainWindow ,font=Button_font1 ,fg="white", bg="green", text="Sign up", width=15, height=1, command=lambda: main_to_Sign_up(MainWindow))
-    Sign_up_button.pack(pady=(15,20))
-
-#log in Label and button
-    log_in_Message_label=tkinter.Label(MainWindow, font=Other_labels_font, bg="black",fg="white", text="Already have an Account? Login!") 
-    log_in_Message_label.pack(pady=(20,0))
-
-    log_in_button = tkinter.Button(MainWindow,font=Button_font1 ,fg="white", bg="blue" , text="Log in", width=15, height=1, command=lambda: main_to_login(MainWindow))
+    log_in_button = tkinter.Button(MainWindow, bg="blue" , text="Log in", command=lambda: main_to_login(MainWindow), **Button_style_1,**Basic_Button_style)
     log_in_button.pack(pady=(15,0)) 
 
     MainWindow.mainloop()
