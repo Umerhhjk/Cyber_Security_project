@@ -2,7 +2,7 @@
 import tkinter
 from email_validator import validate_email, EmailNotValidError
 from Filing_logic import *
-
+from Transaction_GUI import Send_Money,Recieve_Money,go_back
 
 X_cord=600   #these represent where to show window on screen
 Y_cord=130
@@ -16,7 +16,7 @@ Button_font1=("Arial Black", 20, "bold")
 Button_font2=("Arial Black", 15, "bold")
 Entry_label_font=("Arial", 15)
 Data_Display_font=("Arial", 10,"bold")
-Other_labels_font=("Arial", 18, "bold")
+Other_labels_font=("Arial", 15, "bold")
 
 Basic_Button_style = {
     "fg": "white",
@@ -46,21 +46,100 @@ Button_style_3 = {
 
 #styles END --------------------------------------------------
 
+#------------------------------------------- Change_Password Functions Start -----------------------------------------
 
-#incomplete Functions --------------------------------------------------------------------------------------------------
-def Send_Money():
-    pass
+def Validate_Passwod_data(Entered_data,This_username):
+    Old_Password,entered_password,entered_confirm_password=Entered_data
 
-def Recieve_Money():
-    pass
+    def Validade_new_Password():
+        Validation_error=None
+        if(entered_password=="" or Old_Password=="" or entered_confirm_password==""):
+            Validation_error="Password Fill all input fields." 
+        elif(len(entered_password)<8):
+            Validation_error="Password should be atleast 8 characters long." 
+        if(len(entered_password)<8):
+            Validation_error="Password should be atleast 8 characters long." 
+        elif(entered_password!=entered_confirm_password):
+            Validation_error="Password and Confirm Password fields do not match."
+        elif(entered_password==Old_Password):
+            Validation_error="New Password can not be the same as old password."
+        elif(len(entered_password)>20):
+            Validation_error="Password should be atmost 20 characters long."
+        elif any(character in entered_password for character in ['#', '"', '\'','\n','!',':']):
+            Validation_error="Password contains invalid characters."
+        return Validation_error 
 
-def Change_Password():
-    pass
+    NewPasswordError= Validade_new_Password()
+    if(NewPasswordError==None):
+       Old_Password_check=check_old_password(This_username,Old_Password)
+       if(Old_Password_check!=1):
+           return "Invalid Password."
+       
+    elif(NewPasswordError!=None):
+        return NewPasswordError
 
-def Update_Balance():
-    pass
+    else:
+        return ""
 
-#incomplete Functions END------------------------------------------------------------------------------------------------
+def Change_Password(This_username):
+    Change_Password_window = tkinter.Tk()
+    Change_Password_window.title("Change Password") 
+    Change_Password_window.geometry(f"610x590+{X_cord}+{Y_cord}") 
+    Change_Password_window.config(bg="black")
+
+    ID_label=tkinter.Label(Change_Password_window,font=Other_Headings_font, bg="black", fg="#D8a616" ,text="Change Password") 
+    ID_label.grid(row=0,column=0,pady=(20,30))
+
+    Change_password_frame=tkinter.LabelFrame(Change_Password_window) 
+    Change_password_frame.grid(row=1,column=0 ,padx=20,pady=10)
+
+    Button_Frame=tkinter.LabelFrame(Change_Password_window,bg="black",  relief="flat") 
+    Button_Frame.grid(row=5,column=0 ,padx=20,pady=10)
+
+    Old_password_label=tkinter.Label(Change_password_frame,font=Other_labels_font,text="Old Password")   #(this is one of the contained labels)
+    Old_password_label.grid(row=1,column=0, pady=10, ipady=5)
+
+    Old_password_entry=tkinter.Entry(Change_password_frame,font=Entry_label_font, bg="white",fg="gray", width=35,show="*")
+    Old_password_entry.grid(row=1,column=1, padx=10, pady=10, ipady=5,ipadx=5)
+
+    New_Password=tkinter.Label(Change_password_frame,font=Other_labels_font,text="New Password")
+    New_Password.grid(row=2,column=0, pady=10, ipady=5)
+
+    New_Password_entry=tkinter.Entry(Change_password_frame,font=Entry_label_font, bg="white",fg="gray", width=35,show="*")
+    New_Password_entry.grid(row=2,column=1, padx=10, pady=10, ipady=5)
+
+    Confirm_New_Password=tkinter.Label(Change_password_frame,font=Other_labels_font,text="Confirm\nNew Password")
+    Confirm_New_Password.grid(row=3,column=0, pady=10, ipady=5)
+
+    Confirm_New_Password_entry=tkinter.Entry(Change_password_frame,font=Entry_label_font, bg="white",fg="gray", width=35,show="*")
+    Confirm_New_Password_entry.grid(row=3,column=1, padx=10, pady=10, ipady=5)
+
+
+    Error_label=tkinter.Label(Change_password_frame,font=Simple_text_font, fg="Red",justify="left",text="")  
+    Error_label.grid(row=4,column=0, columnspan=2,pady=(10,20))  
+
+    back_button = tkinter.Button(Button_Frame, bg="#901111", text="Cancel",command=lambda: go_back(Change_Password_window),**Button_style_2,**Basic_Button_style)
+    back_button.grid(row=5,column=0, padx=20, pady=(20,10)) 
+
+    def Submit_Change_Passwod_data():
+        Entered_data = [
+            Old_password_entry.get(),  
+            New_Password_entry.get(),
+            Confirm_New_Password_entry.get(), 
+        ]
+        error_text=Validate_Passwod_data(Entered_data,This_username)
+        if(error_text!=""):
+           Error_label.config(text=error_text)   #if there is an error, display it
+        else:
+            Change_Password_window.destroy()
+            print("Password Change Successful")
+            Update_Password(This_username,Entered_data[1]) 
+
+    Submit_Data_button = tkinter.Button(Button_Frame, bg="#13780a" , text="Submit\nData",command=Submit_Change_Passwod_data, **Button_style_2,**Basic_Button_style)
+    Submit_Data_button.grid(row=5,column=1,padx=20,pady=(20,10)) 
+
+#------------------------------------------- Change_Password Functions END -------------------------------------------
+
 
 #Auxiliary Functions --------------------------------------------------------------------------------
 def login_to_Sign_up(login_Window):
@@ -88,7 +167,6 @@ def Create_User_Account(Singup_data):
     ID=Create_Account(Singup_data)
     Show_User_Account(ID)
 
-
 def Wrap_over_newline(mystring, limit=20): #this function makes sure the errors are wrapped with the frame, and dont overflow
     words = mystring.split() 
     current_length = 0
@@ -110,7 +188,7 @@ def Wrap_over_newline(mystring, limit=20): #this function makes sure the errors 
 def Show_Admin_Account():
     Admin_Account_Window = tkinter.Tk()
     Admin_Account_Window.title("Admin Account") 
-    Admin_Account_Window.geometry(f"465x430+{X_cord}+{Y_cord}") 
+    Admin_Account_Window.geometry(f"465x350+{X_cord}+{Y_cord}") 
     Admin_Account_Window.config(bg="black")
 
 
@@ -121,26 +199,32 @@ def Show_Admin_Account():
     Admin_frame=tkinter.LabelFrame(Admin_Account_Window,bg="black",  relief="flat") #relief="flat" sets visible boderwidth to 0
     Admin_frame.grid(row=1,column=0 ,padx=20,pady=10)
 
-    Send_Money_button = tkinter.Button(Admin_frame, bg="#15aacb" , text="Display\nUser Info",command=Display_All_Users_Info, **Button_style_2,**Basic_Button_style)
-    Send_Money_button.grid(row=1,column=0,padx=25,pady=(20,10)) 
-
-    Recieve_Money_button = tkinter.Button(Admin_frame, bg="#13780a" , text="Update\nBalance",command=Update_Balance, **Button_style_2,**Basic_Button_style)
-    Recieve_Money_button.grid(row=1,column=1,padx=20,pady=(20,10)) 
+    Display_All_button = tkinter.Button(Admin_frame, bg="#15aacb" , text="Display\nUser Info",command=Display_All_Users_Info, **Button_style_2,**Basic_Button_style)
+    Display_All_button.grid(row=1,column=0,padx=25,pady=(20,10)) 
 
     Log_out_button = tkinter.Button(Admin_frame, bg="#901111", text="Log out",command=lambda: Log_out(Admin_Account_Window),**Button_style_2,**Basic_Button_style)
-    Log_out_button.grid(row=2,column=0,padx=20,pady=(20,10)) 
+    Log_out_button.grid(row=1,column=1,padx=20,pady=(20,10))
 
 
 def Display_All_Users_Info():
-     Display_File_Window = tkinter.Tk()
-     Display_File_Window.title("User Info") 
+    Display_File_Window = tkinter.Tk()
+    Display_File_Window.title("User Info")
 
-     txt_data=get_txt_file_data() # get all the data in txt file
+   
+    txt_data = get_txt_file_data() 
 
-     data_Display_label=tkinter.Label(Display_File_Window,font=Data_Display_font, fg="black" ,justify="left" ,text=txt_data)  # display the data in txt file
-     data_Display_label.grid(row=0,column=0)    
-     Display_File_Window.grid_rowconfigure(0, weight=1)
-     Display_File_Window.grid_columnconfigure(0, weight=1)    
+    frame = tkinter.Frame(Display_File_Window)
+    frame.pack(fill=tkinter.BOTH, expand=True)
+
+    text_widget = tkinter.Text(frame, wrap=tkinter.WORD, font=('Arial', 10), fg="black")
+    text_widget.insert(tkinter.END, txt_data)  
+    text_widget.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=True)
+
+    scrollbar = tkinter.Scrollbar(frame, command=text_widget.yview)
+    scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
+    text_widget.config(yscrollcommand=scrollbar.set)
+
+    Display_File_Window.mainloop() 
 
 #--------------------------------- Admin WIndow ENDS -------------------------------------------------------------------
 
@@ -156,7 +240,6 @@ def Show_User_Account(Acount_Id):
     Account_Details=get_Details(str(Acount_Id)) # found in filing_logic.cpp
 
     Username,Email,Account_Balance,Password,Public_Key,Private_Key,Acount_Id=Account_Details
-    print(Account_Details)
 
     balance_text="(Account Balance: " + Account_Balance + " Rs)"
 
@@ -170,19 +253,18 @@ def Show_User_Account(Acount_Id):
     user_frame=tkinter.LabelFrame(User_Account_Window,bg="black",  relief="flat") #relief="flat" sets visible boderwidth to 0
     user_frame.grid(row=2,column=0 ,padx=20,pady=10)
 
-    Send_Money_button = tkinter.Button(user_frame, bg="#15aacb" , text="Send\nMoney",command=Send_Money, **Button_style_2,**Basic_Button_style)
+    Send_Money_button = tkinter.Button(user_frame, bg="#15aacb" , text="Send\nMoney",command=lambda: Send_Money(Account_Balance,Username,Balance_label,Account_Balance), **Button_style_2,**Basic_Button_style)
     Send_Money_button.grid(row=2,column=0,padx=25,pady=(20,10)) 
 
-    Recieve_Money_button = tkinter.Button(user_frame, bg="#13780a" , text="Recieve\nMoney",command=Recieve_Money, **Button_style_2,**Basic_Button_style)
+    Recieve_Money_button = tkinter.Button(user_frame, bg="#13780a" , text="Recieve\nMoney",command=lambda: Recieve_Money(Username,Balance_label,Account_Balance), **Button_style_2,**Basic_Button_style)
     Recieve_Money_button.grid(row=2,column=1,padx=20,pady=(20,10)) 
 
-    Change_Password_button = tkinter.Button(user_frame, bg="#D8a616" , text="Change\nPassword",command=Change_Password, **Button_style_2,**Basic_Button_style)
+    Change_Password_button = tkinter.Button(user_frame, bg="#D8a616" , text="Change\nPassword",command=lambda: Change_Password(Username), **Button_style_2,**Basic_Button_style)
     Change_Password_button.grid(row=3,column=0,padx=20,pady=(20,10)) 
 
     Log_out_button = tkinter.Button(user_frame, bg="#901111", text="Log out",command=lambda: Log_out(User_Account_Window),**Button_style_2,**Basic_Button_style)
     Log_out_button.grid(row=3,column=1,padx=20,pady=(20,10)) 
-#User Window ENDS -------------------------------------------------------------------------------------------------------- END------------------------------------------------------------------------------------------------
-
+#User Window ENDS --------------------------------------------------------------------------------------------------------
 
 # Functions to remove or Add Placeholder text --------------------------------------------------
 def on_focus_in(event, entry, placeholder_text):
@@ -219,7 +301,11 @@ def Validate_Signup_data(Singup_data):
             Validation_error="Username should be atmost 20 characters long."    
         elif(entered_username in All_Usernames):
                 Validation_error="Username already in use. Choose a different Username."
-        elif any(character in entered_username for character in ['#', '"', '\'','\n','!',':']):
+        elif(' ' in entered_username):
+                Validation_error="Username can not contain any spaces."
+        elif(entered_username[0].isdigit()):
+                Validation_error="Username can not start with a digit."
+        elif any(character in entered_username for character in ['#', '"', '\'','\n','!',':','{','}']):
             Validation_error="Username contains invalid characters."
         return Validation_error    
 
@@ -268,7 +354,7 @@ def Validate_login_data(login_data):
 # --------------------------- Sign Up window ---------------------------------------------------------------------------
 
 def Sign_Up_Function():
-   
+
    Signup_Window = tkinter.Tk()
    Signup_Window.title("Signup Window")  # Title forSignup_Window
    Signup_Window.geometry(f"465x550+{X_cord}+{Y_cord}")  # Size forSignup_Window
@@ -390,7 +476,7 @@ def Login_Function():
             Password_entry.get(),  
         ]
 
-        if(login_data[0]=="Username" and login_data[1]=="Password"): #Hardcoded Username and Password for admin.
+        if(login_data[0]=="Admin" and login_data[1]=="Fast1234"): #Hardcoded Username and Password for admin.
             login_Window.destroy()
             Show_Admin_Account()
             return None
@@ -433,7 +519,7 @@ def main():
     MainWindow.config(bg="black")
 
 #main Label
-    App_name_label=tkinter.Label(MainWindow,font=Main_Heading_font, bg="black", fg="red" ,text="Application Name") 
+    App_name_label=tkinter.Label(MainWindow,font=Main_Heading_font, bg="black", fg="red" ,text="Transctions 101") 
     App_name_label.pack(pady=(10,45))
 
     Sign_up_button = tkinter.Button(MainWindow , bg="green", text="Sign up",command=lambda: main_to_Sign_up(MainWindow),**Button_style_1,**Basic_Button_style)
