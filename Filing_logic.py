@@ -1,7 +1,7 @@
 from rsa import *
 from sha1 import *
 import os
-current_directory = os.path.dirname(__file__)  # Making sure the file is always created in the same folder witht he program
+current_directory = os.path.dirname(__file__)  # Making sure the file is always created in the same folder with the program
 file_path = os.path.join(current_directory, 'User_data.txt')
 
 def list_to_strings(Plain_Text):
@@ -36,7 +36,7 @@ def get_file_data_string():
   except FileNotFoundError:  
      return "File is Empty"
 
-def get_txt_file_data(): #for signing up, Username must be unique, it cant already exist in file, so getting list of all usernames
+def get_txt_file_data():
   
   File_data=get_file_data_string()
   Data_to_display=""
@@ -76,8 +76,8 @@ def Create_Account(Account_data):
 
   generated_keys=generate_keypair()
 
-  Private_key=generated_keys[0]
-  Public_key=generated_keys[1]
+  Public_key=generated_keys[0]
+  Private_key=generated_keys[1]
 
 
   Acount_Information = [
