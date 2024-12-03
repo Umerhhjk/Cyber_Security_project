@@ -271,16 +271,13 @@ def Update_Account_Data(line_number,new_data,file_data):
         print(f"An error occurred: {e}")
 
 def check_old_password(Username,entered_password):
-     
      File_data=get_file_data_string()
      i = 0
      while (i < len(File_data)):
         line = File_data[i]
         if("Username: " in line and Username in line):
-            print("found")
             line=File_data[i+3]
             old_password=line.replace("Password: ", "").strip()
-            print(old_password,entered_password)
             entered_password=hash_Password(entered_password)
             if(entered_password==old_password):
                 return 1
