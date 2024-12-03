@@ -1,8 +1,10 @@
 #pip install email-validator (install this if you havent already)
 import tkinter
-from email_validator import validate_email, EmailNotValidError
+
+from email_validator import EmailNotValidError, validate_email
+
 from Filing_logic import *
-from Transaction_GUI import Send_Money,Recieve_Money,go_back
+from Transaction_GUI import Recieve_Money, Send_Money, go_back
 
 X_cord=600   #these represent where to show window on screen
 Y_cord=130
@@ -70,12 +72,12 @@ def Validate_Passwod_data(Entered_data,This_username):
         return Validation_error 
 
     NewPasswordError= Validade_new_Password()
-    if(NewPasswordError==None):
+    if(NewPasswordError is None):
        Old_Password_check=check_old_password(This_username,Old_Password)
        if(Old_Password_check!=1):
            return "Invalid Password."
        
-    elif(NewPasswordError!=None):
+    elif(NewPasswordError is not None):
         return NewPasswordError
 
     else:
@@ -402,11 +404,11 @@ def Sign_Up_Function():
 
         Problems=Validate_Signup_data(Singup_data)
         error_text=""
-        if(Problems[0]!=None):
+        if(Problems[0] is not None):
             error_text=Problems[0]
-        elif(Problems[1]!=None):
+        elif(Problems[1] is not None):
             error_text=Problems[1]  
-        elif(Problems[2]!=None):
+        elif(Problems[2] is not None):
             error_text=Problems[2]  
         
         if(len(error_text)>40):
@@ -484,7 +486,7 @@ def Login_Function():
         Acount_Id=0
         Validation_result = Validate_login_data(login_data)  #index 0 is error, index 1 is id
         error_text=""
-        if(Validation_result[0]!=None):
+        if(Validation_result[0] is not None):
             error_text=Validation_result[0] 
         else:
             Acount_Id=Validation_result[1]

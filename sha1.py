@@ -128,9 +128,12 @@ def rotate_left(number, bits_to_rotate):
     """Perform a Circular left Rotation on a 32-bit Number."""
     return ((number << bits_to_rotate) | 
             (number >> (32 - bits_to_rotate))) & 0xffffffff # The & 0xffffffff is to Ensure the Number is 32 bits long
+def main():
+    test_message = "Hello, World"
+    hash_result = calculate_sha1(test_message)
 
-test_message = "Hello, World"
-hash_result = calculate_sha1(test_message)
+    print(f"Input message: {test_message}")
+    print(f"SHA-1 hash: {hash_result}")
 
-print(f"Input message: {test_message}")
-print(f"SHA-1 hash: {hash_result}")
+if __name__ == "__main__":
+    main()
