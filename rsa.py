@@ -1,3 +1,4 @@
+#pip install sympy (install if you havent already)
 import math
 import random
 
