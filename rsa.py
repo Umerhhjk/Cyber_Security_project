@@ -1,101 +1,107 @@
-from sympy import primerange, gcd
+import math
 import random
 
-def prime_generator(limit):
-    
-    """ Generate two distinct random primes from a specified range. """
-    
-    primes_list = list(primerange(0, limit))
-    return random.sample(primes_list, 2)
+from sympy import primerange
 
-def mod_inverse(e, phi):
-    
-    """ Calculate the modular inverse of e modulo phi using brute-force search. """
-    
-    for d in range(3, phi):
-        if (d * e) % phi == 1:
-            return d
-    raise ValueError("Modular inverse does not exist.")
+PRIMES_LIST : list = list(primerange(100))
 
-def RSA_keys(limit=9999):
+def generate_keypair(list_p: list = PRIMES_LIST):
+    """
+    Generate public and private keys for RSA encryption.
     
-    """ Generate RSA public and private keys along with modulus. """
+    Args:
+    p (int): A large prime number
+    q (int): Another large prime number
     
-    p, q = prime_generator(limit)
+    Returns:
+    tuple: ((public_key, n), (private_key, n))
+    """
+    # Generate Prime Numbers
+    p = list_p[random.randint(0, len(list_p) - 1)]
+    q = list_p[random.randint(0, len(list_p) - 1)]
+    while q == p:
+        q = list_p[random.randint(0, len(list_p))]
+    
+    # Compute n (modulus)
     n = p * q
-    phi_n = (p - 1) * (q - 1)
     
-    e = random.randint(3, phi_n - 1)
-    while gcd(e, phi_n) != 1:
-        e = random.randint(3, phi_n - 1)
+    # Compute phi(n)
+    phi = (p - 1) * (q - 1)
     
-    d = mod_inverse(e, phi_n)
+    # Choose e (public key exponent)
+    e = random.randrange(1, phi)
+    while math.gcd(e, phi) != 1:
+        e = random.randrange(1, phi)
     
-    return (e, n), (d, n), n, p, q, phi_n
+    # Compute d (private key exponent)
+    # d is the modular multiplicative inverse of e
+    def extended_euclidean(a, b):
+        """Extended Euclidean Algorithm to find modular multiplicative inverse."""
+        if a == 0:
+            return b, 0, 1
+        else:
+            gcd, x, y = extended_euclidean(b % a, a)
+            return gcd, y - (b // a) * x, x
+    
+    _, d, _ = extended_euclidean(e, phi)
+    
+    # Ensure d is positive
+    d = d % phi
+    
+    # Public key is (e, n), private key is (d, n)
+    return ((e, n), (d, n))
 
-# def encode_message(message):
+def encrypt(public_key, plaintext):
+    """
+    Encrypt a message using the public key.
     
-#     """ Convert the message to a list of ASCII values. """
+    Args:
+    public_key (tuple): (e, n)
+    plaintext (str): Message to encrypt
     
-#     return [ord(c) for c in message]
+    Returns:
+    list: Encrypted message as list of integers
+    """
+    e, n = public_key
+    # Convert each character to its ASCII value and encrypt
+    cipher = [pow(ord(char), e, n) for char in plaintext]
+    return cipher
 
-def encode_message_utf8(message):
-    """ Encode a message as a list of integers using UTF-8 encoding. """
-    return list(message.encode('utf-8'))
-
-
-def decode_message_utf8(encoded_bytes):
-    """ Decode a list of UTF-8 encoded integers back to a string. """
-    # Convert the list of integers back to bytes, then decode using UTF-8
-    return bytes(encoded_bytes).decode('utf-8')
-
-
-def encrypt_message(encoded_message, e, n):
+def decrypt(private_key, ciphertext):
+    """
+    Decrypt a message using the private key.
     
-    """ Encrypt the encoded message using the public key (e, n). """
+    Args:
+    private_key (tuple): (d, n)
+    ciphertext (list): Encrypted message as list of integers
     
-    return [pow(c, e, n) for c in encoded_message]
+    Returns:
+    str: Decrypted message
+    """
+    d, n = private_key
+    # Decrypt each number back to its character
+    plain = [chr(pow(char, d, n)) for char in ciphertext]
+    return ''.join(plain)
 
-def decrypt_message(ciphertext, d, n):
-    
-    """ Decrypt the list of integers in ciphertext using the private key (d, n). """
-    
-    return [pow(c, d, n) for c in ciphertext]
-
-# def convert_ciphertext_to_hex(ciphertext):
-    
-#     """ Convert the list of ciphertext integers to a hexadecimal string. """
-    
-#     return ''.join(format(c, 'x') for c in ciphertext)
-
+# Example usage
 def main():
-    public_key, private_key, n, p, q, phi_n = RSA_keys()
+    # Generate public and private keys
+    public_key, private_key = generate_keypair(PRIMES_LIST)
     
-    print("Public Key:", public_key)
-    print("Private Key:", private_key)
-    print("Modulus n:", n)
-    print("Phi of n:", phi_n)
-    print("p:", p)
-    print("q:", q)
+    print("Public key:", public_key)
+    print("Private key:", private_key)
     
+    # Message to encrypt
+    message = "Hello, RSA Encryption!"
+    print("\nOriginal message:", message)
     
-    """First calculate number of bytes.
-        partition it into blocks of size <= n
-        encrypt each block
-        """
-    message = "My name is Khan and I am not a terrorist."
+    # Encrypt the message
+    encrypted_msg = encrypt(public_key, message)
+    print("Encrypted message:", encrypted_msg)
     
-    encoded_message = encode_message_utf8(message)
-    
-    ciphertext = encrypt_message(encoded_message, *public_key)
-    print("Ciphertext array:", ciphertext)
-    
-    #ciphertext_hex = convert_ciphertext_to_hex(ciphertext)
-    #print("Ciphertext as Hexadecimal string:", ciphertext_hex)
-    
-    decrypted_bytes = decrypt_message(ciphertext, *private_key)
-    decrypted_message = decode_message_utf8(decrypted_bytes)
-    print("Decrypted message:", decrypted_message)
+    # Decrypt the message
+    decrypted_msg = decrypt(private_key, encrypted_msg)
+    print("Decrypted message:", decrypted_msg)
 
 if __name__ == "__main__":
     main()
