@@ -1,52 +1,48 @@
+from rsa import *
+from sha1 import *
 import os
 current_directory = os.path.dirname(__file__)  # Making sure the file is always created in the same folder witht he program
 file_path = os.path.join(current_directory, 'User_data.txt')
 
-#Incomplete_functions------------------------------------------------------------------------
-def hash_Password(Plain_Text):
-  return Plain_Text
-  
-def Generate_Private_key():
-  return "TO BE GENERATED"
-
-def Generate_Public_key():
-  return "TO BE GENERATED"
 
 """" the following 2 functions were made for ecryption of txt file, it wasnt a goal of the project, but we planned to add it if we got extra time 
 (which we did not) , so ignore these 2 fucntions but do no remove as the code is built around these.) """
 
-def Ecrypt_Information(Plain_Text):
-  CipherText=""
+def list_to_strings(Plain_Text):
+  string_text=""
   for line in Plain_Text:
-   CipherText= CipherText + line
-  return CipherText
+   string_text= string_text + line
+  return string_text
 
 def Decrypt_Information(Encrypted_text):  
   return Encrypted_text
 
-#--------------------------------------------------------------------------------------------
 
-#-------------------------- Helper Functions Start ---------------------------------------------
+#-------------------------- Helper Functions Start ------------------------------------------
 
-def Decrypt_User_file():
+
+def hash_Password(Plain_Text):
+  hashed_password=calculate_sha1(Plain_Text)
+  return hashed_password
+
+def get_file_data_string():
   try:
     with open(file_path, 'r') as userFile:
-     Encrypted_data=userFile.read()
-     Decrypted_data=Decrypt_Information(Encrypted_data)
-     Decrypted_data=Decrypted_data.split('\n')           #making an iteratable list to make searching easier
+     string_data=userFile.read()
+     string_data=string_data.split('\n')  #making an iteratable list wrt \n's
 
      i=0
-     while (i < len(Decrypted_data)):
-        Decrypted_data[i]=Decrypted_data[i] +'\n' #restoring the \n
+     while (i < len(string_data)):
+        string_data[i]=string_data[i] +'\n' #restoring the \n
         i=i+1
 
-     return  Decrypted_data
+     return  string_data
   except FileNotFoundError:  
      return "File is Empty"
 
-def get_txt_file_data(): #for signing up, Username must be unique, it cant already exist in file
+def get_txt_file_data(): #for signing up, Username must be unique, it cant already exist in file, so getting list of all usernames
   
-  File_data=Decrypt_User_file()
+  File_data=get_file_data_string()
   Data_to_display=""
   for line in File_data:
     Data_to_display= Data_to_display + line
@@ -56,7 +52,7 @@ def get_txt_file_data(): #for signing up, Username must be unique, it cant alrea
 def get_All_Usernames(): #for signing up, Username must be unique, it cant already exist in file
   
   All_Usernames=[]
-  File_data=Decrypt_User_file()
+  File_data=get_file_data_string()
 
   for line in File_data:
      if("Username: " in line):
@@ -67,10 +63,9 @@ def get_All_Usernames(): #for signing up, Username must be unique, it cant alrea
 
 #-------------------------- Helper Functions END ---------------------------------------------
 
-
 #-------------------------- Create Account Procedure Start ------------------------------------
 def Save_Account_Info_in_file(toWrite):
-  ecrypted_text=Ecrypt_Information(toWrite)
+  ecrypted_text=list_to_strings(toWrite)
   
   with open(file_path, 'a') as userfile:
     userfile.write(ecrypted_text)
@@ -82,8 +77,11 @@ def Create_Account(Account_data):
   Password = hash_Password(Account_data[2])
   Account_balance = 0
   Account_id=int(get_Last_ID())+1
-  Private_key=Generate_Private_key()
-  Public_key=Generate_Public_key()
+
+  generated_keys=generate_keypair()
+
+  Private_key=generated_keys[0]
+  Public_key=generated_keys[1]
 
 
   Acount_Information = [
@@ -97,8 +95,12 @@ def Create_Account(Account_data):
 
 
 def get_Last_ID():
+  
+  File_data=get_file_data_string()
+  if(os.path.getsize(file_path) == 0):
+     return 0
+  
   last_id = 0
-  File_data=Decrypt_User_file()
   for line in File_data:
         if "Account ID:" in line:
           try:
@@ -114,15 +116,14 @@ def get_Last_ID():
 def Check_In_File(Input_data):
   Entered_Username = Input_data[0]
   Entered_Password = Input_data[1]
+  Entered_Password=hash_Password(Entered_Password)
   This_Account_Id="0"
 
 
   Username_to_check = f'Username: {Entered_Username}\n'
   Password_to_check = f'Password: {Entered_Password}\n'
 
-  Password_to_check=hash_Password(Password_to_check)    #generate hash of the Password to Check
-
-  File_data=Decrypt_User_file()
+  File_data=get_file_data_string()
   i = 0
   while (i < len(File_data)):
         
@@ -149,7 +150,7 @@ def Check_In_File(Input_data):
 def get_Details(Acount_Id):
     Account_Details=["","","","","","",""]
 
-    File_data=Decrypt_User_file()
+    File_data=get_file_data_string()
     i = 0
     while (i < len(File_data)):
         
@@ -188,7 +189,7 @@ def get_Details(Acount_Id):
 def get_Private_key(Username):
     
     Private_key=""
-    File_data=Decrypt_User_file()
+    File_data=get_file_data_string()
     i = 0
     while (i < len(File_data)):
         
@@ -203,7 +204,7 @@ def get_Private_key(Username):
 def get_Public_key(Username):
     
     Public_key=""
-    File_data=Decrypt_User_file()
+    File_data=get_file_data_string()
     i = 0
     while (i < len(File_data)):
         
@@ -218,7 +219,7 @@ def get_Public_key(Username):
 #-------------------------- Extract  Keys Procedures Ends ---------------------------
 
 def Update_Account_Balance(Username,balance_offset):
-     File_data=Decrypt_User_file()
+     File_data=get_file_data_string()
      i = 0
      while (i < len(File_data)):
         
@@ -240,7 +241,7 @@ def Update_Account_Balance(Username,balance_offset):
 
 def Update_Password(Username,new_password):
      new_password=hash_Password(new_password)
-     File_data=Decrypt_User_file()
+     File_data=get_file_data_string()
      i = 0
      while (i < len(File_data)):
         
@@ -275,7 +276,7 @@ def Update_Account_Data(line_number,new_data,file_data):
 
 def check_old_password(Username,entered_password):
      
-     File_data=Decrypt_User_file()
+     File_data=get_file_data_string()
      i = 0
      while (i < len(File_data)):
         line = File_data[i]

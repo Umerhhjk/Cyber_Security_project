@@ -207,7 +207,6 @@ def Show_Admin_Account():
     Log_out_button = tkinter.Button(Admin_frame, bg="#901111", text="Log out",command=lambda: Log_out(Admin_Account_Window),**Button_style_2,**Basic_Button_style)
     Log_out_button.grid(row=1,column=1,padx=20,pady=(20,10))
 
-
 def Display_All_Users_Info():
     Display_File_Window = tkinter.Tk()
     Display_File_Window.title("User Info")
@@ -354,7 +353,6 @@ def Validate_login_data(login_data):
 
 
 # --------------------------- Sign Up window ---------------------------------------------------------------------------
-
 def Sign_Up_Function():
 
    Signup_Window = tkinter.Tk()
@@ -531,5 +529,4 @@ def main():
     log_in_button.pack(pady=(15,0)) 
 
     MainWindow.mainloop()
-
 main()
