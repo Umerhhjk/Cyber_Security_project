@@ -4,10 +4,6 @@ import os
 current_directory = os.path.dirname(__file__)  # Making sure the file is always created in the same folder witht he program
 file_path = os.path.join(current_directory, 'User_data.txt')
 
-
-"""" the following 2 functions were made for ecryption of txt file, it wasnt a goal of the project, but we planned to add it if we got extra time 
-(which we did not) , so ignore these 2 fucntions but do no remove as the code is built around these.) """
-
 def list_to_strings(Plain_Text):
   string_text=""
   for line in Plain_Text:
