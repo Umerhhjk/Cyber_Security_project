@@ -158,7 +158,7 @@ def Validate_Send_money_data(Entered_data,Current_balance,this_username):
              return "Invalid Amount. Please enter a valid amount to transfer."
     
             if(entered_amount>int(Current_balance)):
-                Validation_error="Entered Amount is less than Current Balance." 
+                Validation_error="Entered Amount is more than Current Balance." 
 
             return  Validation_error 
 
