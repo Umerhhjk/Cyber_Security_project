@@ -76,19 +76,25 @@ def Create_Account(Account_data):
   Password = hash_Password(Account_data[2])
   Account_balance = 0
   Account_id=int(get_Last_ID())+1
+  
+  user_dir = os.path.join("users", Username)
+  os.makedirs(user_dir)
 
   with open("key.txt") as file:
     key_des = file.read()
     Public_key, Private_key=generate_keypair()
     Private_key = des_encrypt_message(str(Private_key), key_des)
-    
-
 
   Acount_Information = [
       f'____________________________ Account ID: {Account_id} ____________________________\n',
-      f'Username: {Username}\n', f'Email: {Email}\n',
-      f'Account Balance: {Account_balance} Rs\n', f'Password: {Password}\n',
-      f'Public Key: {Public_key}\n',f'Private Key: {Private_key}\n','\n\n'
+      f'Username: {Username}\n', 
+      f'Email: {Email}\n',
+      f'Account Balance: {Account_balance} Rs\n',
+      f'Password: {Password}\n',
+      f'Public Key: {Public_key}\n',
+      f'Private Key: {Private_key}\n',
+      f'Path To User Folder: {user_dir}\n',
+      '\n\n'
   ]
   Save_Account_Info_in_file(Acount_Information)
   return Account_id
