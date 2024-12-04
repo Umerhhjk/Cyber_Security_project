@@ -1,6 +1,9 @@
+import os
+
+from des import des_encrypt_message
 from rsa import *
 from sha1 import *
-import os
+
 current_directory = os.path.dirname(__file__)  # Making sure the file is always created in the same folder with the program
 file_path = os.path.join(current_directory, 'User_data.txt')
 
@@ -74,10 +77,11 @@ def Create_Account(Account_data):
   Account_balance = 0
   Account_id=int(get_Last_ID())+1
 
-  generated_keys=generate_keypair()
-
-  Public_key=generated_keys[0]
-  Private_key=generated_keys[1]
+  with open("key.txt") as file:
+    key_des = file.read()
+    Public_key, Private_key=generate_keypair()
+    Private_key = des_encrypt_message(str(Private_key), key_des)
+    
 
 
   Acount_Information = [
