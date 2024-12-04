@@ -34,7 +34,7 @@ Public Key: (373, 583)
 Private Key: (237, 583)
 
 Comments
--) Qreader
+-) Qreader, QRtools
 -) the Recieve money function is named def get_data_from_QR, it is found in Transaction_GUI, in that function:-
 
     #your code for QR scanning here
