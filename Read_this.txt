@@ -4,8 +4,8 @@ RSA Decryption function doesnt work.. (Transaction GUI line no 67)
 
 Once RSA data is obtained, uncomment lines from get_data_from_QR_code, and display that data in a new window (Transaction GUI line no 97)
 
-If hash of message doesnt match hash of this message, print "message corrupted or chaged" on console and destroy this window
+If hash of message doesnt match hash of this message, print "message corrupted or changed" on console and destroy this window
 
-implement QRs_redeemed.txt , which will contain all the QR odes that have been redeemed so they cant be redeemed again (wouldnt this cause problems? sir will just say, ok, so what if i cange name of the qr code?
- i suggest we just delete the QR code)
+implement QRs_redeemed.txt , which will contain all the QR codes that have been redeemed so they cant be redeemed again (wouldnt this cause problems? sir will just say, "ok, so what if i change name of the qr code?"
+ i suggest we just delete the QR code image entirely.)
 
