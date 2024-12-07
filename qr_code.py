@@ -41,6 +41,15 @@ Signature: {signature}"""
     return qr_image
 
 def read_qr_code(image_path):
+    """
+    Read the QR code from an image file
+
+    Args:
+        image_path (str): path to qr code
+
+    Returns:
+        list[str]: data in qr code as a list of strings
+    """
     image = cv2.imread(image_path)
     detector = cv2.QRCodeDetector()
     detected_data, points, straight_qrcode = detector.detectAndDecode(image)

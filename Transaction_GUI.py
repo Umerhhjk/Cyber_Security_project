@@ -82,7 +82,9 @@ def get_data_from_QR(my_username,Balance_label,Account_Balance,QR_received=None,
     if(QR_window is not None):
        QR_window.destroy() 
     #rest of the code here
-    #QR_data_list=qr_code.read_qr_code("image_path") #this will have the RSA encrypted Username,Amount,Message,Time_of_generation, and hash of this transaction
+    #QR_data_list=qr_code.read_qr_code("image_path") 
+    #this will have a list of strings, each string is a data from the QR code. 
+    #run qr_code.py to see the format it will be.
 
     Sender_username="" #change this to actual sender's username (we get that from QR_data_list)
 
