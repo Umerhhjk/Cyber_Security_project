@@ -43,9 +43,9 @@ Signature: {signature}"""
 def read_qr_code(image_path):
     image = cv2.imread(image_path)
     detector = cv2.QRCodeDetector()
-    data, points, straight_qrcode = detector.detectAndDecode(image)
-    if len(data) > 0:
-        print(data)
+    detected_data, points, straight_qrcode = detector.detectAndDecode(image)
+    data = detected_data.split("\n")
+    return data
 
 # Example usage
 def main():
@@ -68,7 +68,7 @@ def main():
     # Save the QR code image
     qr_image.save("transaction_qr_code.png")
     print("QR code generated successfully!")
-    
+    read_qr_code("transaction_qr_code.png")
 
 if __name__ == "__main__":
     main()
