@@ -4,7 +4,9 @@ import tkinter
 from datetime import datetime
 from tkinter import filedialog
 
+import qr_code
 from Filing_logic import *
+from rsa import *
 from sha1 import calculate_sha1
 
 X_cord=600  
@@ -54,6 +56,9 @@ Button_style_3 = {
 
 def RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,Reciever_Public_key):
     signature = f"{Username} {Amount} {Message} {Time_of_generation}"
+    Username = encrypt(Reciever_Public_key, Username)
+    Amount = encrypt(Reciever_Public_key, str(Amount))
+    Message = encrypt(Reciever_Public_key, Message)
     HASH_of_MSG=calculate_sha1(signature)
     temporary_testing_list=[Username, Amount, Message, Time_of_generation, HASH_of_MSG]
     return temporary_testing_list
@@ -66,7 +71,8 @@ def RSA_decryption_and_message_verification_with_hash(QR_data_list,Sender_public
 def Generate_QR_Code(QR_code_Data):  
 
     #code to generate the QR code here, it should save the QR code in the same folder, and display in the window below made here
-
+    qrCodes = qr_code.generate_qr_code(QR_code_Data[0],QR_code_Data[1],QR_code_Data[2],QR_code_Data[3],QR_code_Data[4])
+    #qrCodes.save("filepath")
     Generate_QR_Code_Window = tkinter.Tk()
     Generate_QR_Code_Window.title("Generated QR Code")
     Generate_QR_Code_Window.mainloop()
@@ -76,7 +82,7 @@ def get_data_from_QR(my_username,Balance_label,Account_Balance,QR_received=None,
     if(QR_window is not None):
        QR_window.destroy() 
     #rest of the code here
-    QR_data_list=[] #this will have the RSA encrypted Username,Amount,Message,Time_of_generation, and hash of this transaction
+    #QR_data_list=qr_code.read_qr_code("image_path") #this will have the RSA encrypted Username,Amount,Message,Time_of_generation, and hash of this transaction
 
     Sender_username="" #change this to actual sender's username (we get that from QR_data_list)
 
@@ -102,8 +108,8 @@ def get_data_from_QR(my_username,Balance_label,Account_Balance,QR_received=None,
 
 
 def Complete_Transaction(Entered_data,Current_User,Balance_label,Account_Balance):
-    Username="Username: " + Entered_data[0]
-    Amount="Amount: " + Entered_data[1]
+    Username=Entered_data[0]
+    Amount=Entered_data[1]
     money_to_send=int(Entered_data[1])
     money_to_send*=-1
 

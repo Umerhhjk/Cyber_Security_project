@@ -68,7 +68,8 @@ def main():
     # Save the QR code image
     qr_image.save("transaction_qr_code.png")
     print("QR code generated successfully!")
-    read_qr_code("transaction_qr_code.png")
+    data = read_qr_code("transaction_qr_code.png")
+    print(data)
 
 if __name__ == "__main__":
     main()
