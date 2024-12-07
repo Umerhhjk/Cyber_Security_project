@@ -1,10 +1,11 @@
 # pip install Pillow (install if you havent already)
 
 import tkinter
-from tkinter import filedialog
-from PIL import Image, ImageTk
 from datetime import datetime
+from tkinter import filedialog
+
 from Filing_logic import *
+from sha1 import calculate_sha1
 
 X_cord=600  
 Y_cord=130
@@ -51,9 +52,10 @@ Button_style_3 = {
 
 #Incomplete Functions -------------------------------------------------------------------------
 
-def RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,Sender_private_key,Reciever_Public_key):
-    HASH_of_MSG=None
-    temporary_testing_list=[Username,Amount,Message,Time_of_generation, HASH_of_MSG]
+def RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,Reciever_Public_key):
+    signature = f"{Username} {Amount} {Message} {Time_of_generation}"
+    HASH_of_MSG=calculate_sha1(signature)
+    temporary_testing_list=[Username, Amount, Message, Time_of_generation, HASH_of_MSG]
     return temporary_testing_list
 
 def RSA_decryption_and_message_verification_with_hash(QR_data_list,Sender_public_key,Reciever_Private_key):
@@ -71,7 +73,7 @@ def Generate_QR_Code(QR_code_Data):
 
 
 def get_data_from_QR(my_username,Balance_label,Account_Balance,QR_received=None,QR_window=None):  #QR_received is the image from which we exctract data from
-    if(QR_window!=None):
+    if(QR_window is not None):
        QR_window.destroy() 
     #rest of the code here
     QR_data_list=[] #this will have the RSA encrypted Username,Amount,Message,Time_of_generation, and hash of this transaction
@@ -117,12 +119,11 @@ def Complete_Transaction(Entered_data,Current_User,Balance_label,Account_Balance
         Message=Message + "No Additional Message"
     else:    
        Message=Message + Entered_data[2]
-
-    Sender_private_key=get_Private_key(Current_User)     #when keys are extracted, they will be in encrypted form
+     #when keys are extracted, they will be in encrypted form
     Reciever_Public_key=get_Public_key(Entered_data[0])
 
 
-    QR_code_Data=RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,Sender_private_key,Reciever_Public_key)
+    QR_code_Data=RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,Reciever_Public_key)
     Generate_QR_Code(QR_code_Data)
     get_data_from_QR(Current_User,Balance_label,Account_Balance)
 
@@ -165,9 +166,9 @@ def Validate_Send_money_data(Entered_data,Current_balance,this_username):
         UsernameError=Validade_Username()
         amount_error=Validade_entered_amount(entered_amount)
     
-        if(UsernameError!=None):
+        if(UsernameError is not None):
             return UsernameError
-        elif(amount_error!=None):
+        elif(amount_error is not None):
             return amount_error
         elif(len(custom_msg)>150):
             return "Message Can not Exceed 200 Characters"
