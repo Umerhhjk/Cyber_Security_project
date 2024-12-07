@@ -1,11 +1,14 @@
 import os
+import re
 
-from des import des_encrypt_message
+from des import des_encrypt_message,des_decrypt_message
 from rsa import *
 from sha1 import *
+from datetime import datetime
 
 current_directory = os.path.dirname(__file__)  # Making sure the file is always created in the same folder with the program
 file_path = os.path.join(current_directory, 'User_data.txt')
+key_file_path= os.path.join(current_directory, 'key.txt')
 
 def list_to_strings(Plain_Text):
   string_text=""
@@ -13,12 +16,21 @@ def list_to_strings(Plain_Text):
    string_text= string_text + line
   return string_text
 
-def Decrypt_Information(Encrypted_text):  
-  return Encrypted_text
-
+def set_des_key():
+   with open(key_file_path, 'r') as file:
+    key_des = file.read()
+    return  key_des
+   
 
 #-------------------------- Helper Functions Start ------------------------------------------
 
+def Give_name_to_folder(): # gets current time and names the folder.
+   
+   Current_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+   Qr_name='\\'  #starting with a \ to seperate name from filepath 
+   Qr_name+=Current_time.replace(' ', '_').replace(':', '_').replace('-', '_')   # replacing () ' ', '-' and ':' ) because they caused problems in file paths
+   Qr_name+='.png' #adding the png extention, otherwise the qrcode.save assumes the name is part of the folder path
+   return Qr_name
 
 def hash_Password(Plain_Text):
   hashed_password=calculate_sha1(Plain_Text)
@@ -60,14 +72,25 @@ def get_All_Usernames(): #for signing up, Username must be unique, it cant alrea
       
   return All_Usernames
 
+
+def extract_proper_key(keystring):                     # function to slice string from (a,b) format to a and b. returns a list of integers
+    match = re.match(r'\((\d+),\s*(\d+)\)', keystring)
+    if match:
+        part1 = int(match.group(1))
+        part2 = int(match.group(2))
+        key_pair=[part1,part2]
+        return key_pair
+    else:
+        raise ValueError("String format is incorrect")
+
 #-------------------------- Helper Functions END ---------------------------------------------
 
 #-------------------------- Create Account Procedure Start ------------------------------------
 def Save_Account_Info_in_file(toWrite):
-  ecrypted_text=list_to_strings(toWrite)
+  string_data=list_to_strings(toWrite)
   
   with open(file_path, 'a') as userfile:
-    userfile.write(ecrypted_text)
+    userfile.write(string_data)
     print('Account Successfully Created')
 
 def Create_Account(Account_data):
@@ -77,13 +100,13 @@ def Create_Account(Account_data):
   Account_balance = 0
   Account_id=int(get_Last_ID())+1
   
-  user_dir = os.path.join("users", Username)
+  full_directory_path = os.path.join(current_directory, "CY_Project_USERS")
+  user_dir = os.path.join(full_directory_path, Username)
   os.makedirs(user_dir)
-
-  with open("key.txt") as file:
-    key_des = file.read()
-    Public_key, Private_key=generate_keypair()
-    Private_key = des_encrypt_message(str(Private_key), key_des)
+  key_des=set_des_key()
+  Public_key, Private_key=generate_keypair()
+  Public_key = des_encrypt_message(str( Public_key), key_des)
+  Private_key = des_encrypt_message(str(Private_key), key_des)
 
   Acount_Information = [
       f'____________________________ Account ID: {Account_id} ____________________________\n',
@@ -190,7 +213,7 @@ def get_Details(Acount_Id):
 #-------------------------- Get Account Details Procedure ENDS ---------------------------
 
 
-#-------------------------- Extract Keys Procedures Start ---------------------------
+#-------------------------- Extract Keys and QR file path Procedures Start ---------------------------
 
 def get_Private_key(Username):
     
@@ -203,6 +226,9 @@ def get_Private_key(Username):
         if("Username: " in line and Username in line):
            line=File_data[i+5]
            Private_key=line.replace("Private Key: ", "").strip() #Extract Private Key (hashed)
+           key_des=set_des_key()
+           Private_key=des_decrypt_message(Private_key,key_des)
+           Private_key=extract_proper_key(Private_key)
            return Private_key
         i=i+1
     return ""    
@@ -218,9 +244,27 @@ def get_Public_key(Username):
         if("Username: " in line and Username in line):
            line=File_data[i+4]
            Public_key=line.replace("Public Key: ", "").strip() #Extract Public Key (hashed)
+           key_des=set_des_key()
+           Public_key=des_decrypt_message(Public_key,key_des)
+           Public_key=extract_proper_key(Public_key)
            return Public_key
         i=i+1
-    return ""    
+    return ""   
+
+def get_QR_File_path(Username):
+    qr_path=""
+    File_data=get_file_data_string()
+    i = 0
+    while (i < len(File_data)):
+        
+        line = File_data[i]
+        if("Username: " in line and Username in line):
+           line=File_data[i+6]
+           qr_path=line.replace("Path To User Folder: ", "").strip() #Extract Qr code file pathway
+           qr_path+=Give_name_to_folder()  #----------------- DEBUGGER's NOtE: remove if doesnt work
+           return qr_path
+        i=i+1
+    return ""   
 
 #-------------------------- Extract  Keys Procedures Ends ---------------------------
 

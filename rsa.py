@@ -81,6 +81,7 @@ def decrypt(private_key, ciphertext):
     """
     d, n = private_key
     # Decrypt each number back to its character
+    
     plain = [chr(pow(char, d, n)) for char in ciphertext]
     return ''.join(plain)
 
