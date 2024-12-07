@@ -133,7 +133,6 @@ def Complete_Transaction(Entered_data,Current_User,Balance_label,Account_Balance
 
     QR_code_Data=RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,Reciever_Public_key)
     Generate_QR_Code(QR_code_Data)
-    get_data_from_QR(Current_User,Balance_label,Account_Balance)
 
 
 
