@@ -1,2 +1,3 @@
 run
-. pip install sympy opencv-python pillow qrcode email-validator
+
+pip install sympy opencv-python pillow qrcode email-validator
