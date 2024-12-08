@@ -3,6 +3,7 @@
 import tkinter
 from datetime import datetime
 from tkinter import filedialog
+
 from PIL import Image, ImageTk
 
 import qr_code
@@ -67,9 +68,21 @@ def RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,R
 def RSA_decryption_msg(QR_name,QR_amount,QR_msg,Reciever_Private_key):
     QR_data_list=[]
 
-    # QR_data_list.append(decrypt(Reciever_Private_key, QR_name))
-    # QR_data_list.append(decrypt(Reciever_Private_key, QR_amount))
-    # QR_data_list.append(decrypt(Reciever_Private_key, QR_msg))
+    QR_name = QR_name.strip("[]")
+    QR_name = QR_name.split(", ")
+    QR_name = [int(num) for num in QR_name]
+    
+    QR_amount = QR_amount.strip("[]")
+    QR_amount = QR_amount.split(", ")
+    QR_amount = [int(num) for num in QR_amount]
+    
+    QR_msg = QR_msg.strip("[]")
+    QR_msg = QR_msg.split(", ")
+    QR_msg = [int(num) for num in QR_msg]
+    
+    QR_data_list.append(decrypt(Reciever_Private_key, QR_name))
+    QR_data_list.append(decrypt(Reciever_Private_key, QR_amount))
+    QR_data_list.append(decrypt(Reciever_Private_key, QR_msg))
 
     return QR_data_list #this will be the deccrypted data
 
@@ -102,23 +115,20 @@ def get_data_from_QR(my_username,Sender_name,Balance_label,Account_Balance,QR_re
     QR_amount = None
     QR_msg = None
     QR_date = None
-    QR_signature = None
-    
-    
-    pattern = r'\[(.*?)\]' # Regular expression pattern to extract lists of numbers:  [(extracted num)]
+    QR_signature = None # Regular expression pattern to extract lists of numbers:  [(extracted num)]
     
     # Iterate over each string in the list
     for item in QR_data_list:
-        if "Sender's Name" in item:
-            QR_name = re.search(pattern, item).group(0) # if item is a list of RSA encrypted integers, add it to this list.
+        if "Sender's Name:" in item:
+            _, QR_name = item.split(": ") # if item is a list of RSA encrypted integers, add it to this list.
         elif "Amount" in item:
-            QR_amount = re.search(pattern, item).group(0)
+            _, QR_amount = item.split(": ")
         elif "Message" in item:
-            QR_msg = re.search(pattern, item).group(0)
+            _, QR_msg = item.split(": ")
         elif "Date" in item:
-            QR_date = item
+            _, QR_date = item.split (": ")
         elif "Signature" in item:
-            QR_signature = item
+            _, QR_signature = item.split(": ")
 
             
     all_users=get_All_Usernames()
@@ -130,16 +140,16 @@ def get_data_from_QR(my_username,Sender_name,Balance_label,Account_Balance,QR_re
 
     Transction_information=RSA_decryption_msg(QR_name,QR_amount,QR_msg,Reciever_Private_key) 
 
-    #Sender_username=Transction_information[0]
+    Sender_username=Transction_information[0]
 
-    # #money_to_recieve=Transction_information[1]
-    # new_balance=Update_Account_Balance(my_username,money_to_recieve)
-    # balance_text="(Account Balance: " + str(new_balance) + " Rs)"
-    # Balance_label.config(text=balance_text)
+    money_to_recieve=int(Transction_information[1])
+    new_balance=Update_Account_Balance(my_username,money_to_recieve)
+    balance_text="(Account Balance: " + str(new_balance) + " Rs)"
+    Balance_label.config(text=balance_text)
 
-    #Message_to_display=Transction_information[2]
+    Message_to_display=Transction_information[2]
 
-    #message_verification_with_hash(QR_signature,Sender_public_key,msg)
+    message_verification_with_hash(QR_signature,Sender_public_key,msg)
    
 
 #Incomplete Functions END-------------------------------------------------------------------------
