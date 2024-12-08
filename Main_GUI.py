@@ -4,7 +4,7 @@ import tkinter
 from email_validator import EmailNotValidError, validate_email
 
 from Filing_logic import *
-from Transaction_GUI import Recieve_Money, Send_Money, go_back
+from Transaction_GUI import Receive_Money, Send_Money, go_back
 
 X_cord=600   #these represent where to show window on screen
 Y_cord=130
@@ -256,8 +256,8 @@ def Show_User_Account(Acount_Id):
     Send_Money_button = tkinter.Button(user_frame, bg="#15aacb" , text="Send\nMoney",command=lambda: Send_Money(Account_Balance,Username,Balance_label,Account_Balance), **Button_style_2,**Basic_Button_style)
     Send_Money_button.grid(row=2,column=0,padx=25,pady=(20,10)) 
 
-    Recieve_Money_button = tkinter.Button(user_frame, bg="#13780a" , text="Recieve\nMoney",command=lambda: Recieve_Money(Username,Balance_label,Account_Balance), **Button_style_2,**Basic_Button_style)
-    Recieve_Money_button.grid(row=2,column=1,padx=20,pady=(20,10)) 
+    Receive_Money_button = tkinter.Button(user_frame, bg="#13780a" , text="Receive\nMoney",command=lambda: Receive_Money(Username,Balance_label,Account_Balance), **Button_style_2,**Basic_Button_style)
+    Receive_Money_button.grid(row=2,column=1,padx=20,pady=(20,10)) 
 
     Change_Password_button = tkinter.Button(user_frame, bg="#D8a616" , text="Change\nPassword",command=lambda: Change_Password(Username), **Button_style_2,**Basic_Button_style)
     Change_Password_button.grid(row=3,column=0,padx=20,pady=(20,10)) 
@@ -514,11 +514,11 @@ def main():
 # Creating the main window
     MainWindow = tkinter.Tk()
     MainWindow.title("Login/Signup Window")  # Set the window title
-    MainWindow.geometry(f"465x400+{X_cord}+{Y_cord}")  # Set the window size (width x height)
+    MainWindow.geometry(f"500x400+{X_cord}+{Y_cord}")  # Set the window size (width x height)
     MainWindow.config(bg="black")
 
 #main Label
-    App_name_label=tkinter.Label(MainWindow,font=Main_Heading_font, bg="black", fg="red" ,text="Transctions 101") 
+    App_name_label=tkinter.Label(MainWindow,font=Main_Heading_font, bg="black", fg="red" ,text="Transactions 101") 
     App_name_label.pack(pady=(10,45))
 
     Sign_up_button = tkinter.Button(MainWindow , bg="green", text="Sign up",command=lambda: main_to_Sign_up(MainWindow),**Button_style_1,**Basic_Button_style)

@@ -54,9 +54,7 @@ Button_style_3 = {
 #styles END --------------------------------------------------
 
 
-#Incomplete Functions -------------------------------------------------------------------------
-
-def display_on_screen(Sender_username,money_to_recieve,Message_to_display,QR_date):
+def display_on_screen(Sender_username,money_to_receive,Message_to_display,QR_date):
     display_on_screen_window = tkinter.Tk()
     display_on_screen_window.title("QR code information") 
     display_on_screen_window.geometry(f"470x500+{X_cord}+{Y_cord}") 
@@ -66,7 +64,7 @@ def display_on_screen(Sender_username,money_to_recieve,Message_to_display,QR_dat
     username_display+=Sender_username
 
     money_display="Amount: "
-    money_display+=str(money_to_recieve)
+    money_display+=str(money_to_receive)
 
     Message_display=""
     if(Message_to_display!=""):
@@ -99,16 +97,16 @@ def display_on_screen(Sender_username,money_to_recieve,Message_to_display,QR_dat
     back_button.grid(row=5,column=0, padx=20, pady=(20,10)) 
 
 
-def RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,Reciever_Public_key):
+def RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,Receiver_Public_key):
     signature = f"{Username} {Amount} {Message} {Time_of_generation}"
-    Username = encrypt(Reciever_Public_key, Username)
-    Amount = encrypt(Reciever_Public_key, str(Amount))
-    Message = encrypt(Reciever_Public_key, Message)
+    Username = encrypt(Receiver_Public_key, Username)
+    Amount = encrypt(Receiver_Public_key, str(Amount))
+    Message = encrypt(Receiver_Public_key, Message)
     HASH_of_MSG=calculate_sha1(signature)
     temporary_testing_list=[Username, Amount, Message, Time_of_generation, HASH_of_MSG]
     return temporary_testing_list
 
-def RSA_decryption_msg(QR_name,QR_amount,QR_msg,Reciever_Private_key):
+def RSA_decryption_msg(QR_name,QR_amount,QR_msg,Receiver_Private_key):
     QR_data_list=[]
 
     QR_name = QR_name.strip("[]")
@@ -123,14 +121,14 @@ def RSA_decryption_msg(QR_name,QR_amount,QR_msg,Reciever_Private_key):
     QR_msg = QR_msg.split(", ")
     QR_msg = [int(num) for num in QR_msg]
     
-    QR_data_list.append(decrypt(Reciever_Private_key, QR_name))
-    QR_data_list.append(decrypt(Reciever_Private_key, QR_amount))
-    QR_data_list.append(decrypt(Reciever_Private_key, QR_msg))
+    QR_data_list.append(decrypt(Receiver_Private_key, QR_name))
+    QR_data_list.append(decrypt(Receiver_Private_key, QR_amount))
+    QR_data_list.append(decrypt(Receiver_Private_key, QR_msg))
 
     return QR_data_list #this will be the deccrypted data
 
-def message_verification_and_display(Sender_username,money_to_recieve,Message_to_display,QR_date,QR_signature,Sender_public_key):
-    signature = f"{Sender_username} {money_to_recieve} {Message_to_display} {QR_date}"
+def message_verification_and_display(Sender_username,money_to_receive,Message_to_display,QR_date,QR_signature,Sender_public_key):
+    signature = f"{Sender_username} {money_to_receive} {Message_to_display} {QR_date}"
     this_signature=calculate_sha1(signature)
    
     if(QR_signature!=this_signature):
@@ -141,7 +139,7 @@ def message_verification_and_display(Sender_username,money_to_recieve,Message_to
         return 0
       
     else:
-        display_on_screen(Sender_username,money_to_recieve,Message_to_display,QR_date)
+        display_on_screen(Sender_username,money_to_receive,Message_to_display,QR_date)
         close_QR_Code(QR_signature)
         return 1
 
@@ -196,25 +194,20 @@ def get_data_from_QR(my_username,Sender_name,Balance_label,Account_Balance,QR_re
         return "Error"
     else:    
         Sender_public_key=get_Public_key(Sender_name)
-    Reciever_Private_key=get_Private_key(my_username)
+    Receiver_Private_key=get_Private_key(my_username)
 
-    Transction_information=RSA_decryption_msg(QR_name,QR_amount,QR_msg,Reciever_Private_key) 
+    Transction_information=RSA_decryption_msg(QR_name,QR_amount,QR_msg,Receiver_Private_key) 
 
     Sender_username=Transction_information[0]
-    money_to_recieve=int(Transction_information[1])
+    money_to_receive=int(Transction_information[1])
     Message_to_display=Transction_information[2]
 
-    Qr_status=message_verification_and_display(Sender_username,money_to_recieve,Message_to_display,QR_date,QR_signature,Sender_public_key)
+    Qr_status=message_verification_and_display(Sender_username,money_to_receive,Message_to_display,QR_date,QR_signature,Sender_public_key)
 
     if(Qr_status==1):
-       new_balance=Update_Account_Balance(my_username,money_to_recieve)
+       new_balance=Update_Account_Balance(my_username,money_to_receive)
        balance_text="(Account Balance: " + str(new_balance) + " Rs)"
        Balance_label.config(text=balance_text)
-
-
-   
-
-#Incomplete Functions END-------------------------------------------------------------------------
 
 
 def Complete_Transaction(Entered_data,Current_User,Balance_label,Account_Balance):
@@ -235,10 +228,10 @@ def Complete_Transaction(Entered_data,Current_User,Balance_label,Account_Balance
         Message=Message + "No Additional Message"
     else:    
        Message=Message + Entered_data[2]
-    Reciever_Public_key=get_Public_key(Entered_data[0])
+    Receiver_Public_key=get_Public_key(Entered_data[0])
 
     qr_file_path=get_QR_File_path(Username)
-    QR_code_Data=RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,Reciever_Public_key)
+    QR_code_Data=RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,Receiver_Public_key)
     Generate_QR_Code(QR_code_Data,qr_file_path)
 
 
@@ -253,9 +246,9 @@ def Validate_Send_money_data(Entered_data,Current_balance,this_username):
         def Validade_Username():
             Validation_error=None
             if(entered_username==""):
-                Validation_error="Please Enter the Reciever's Username." 
+                Validation_error="Please Enter the Receiver's Username." 
             elif(entered_username==this_username):
-                Validation_error="Sender and Reciever can't be the same." 
+                Validation_error="Sender and Receiver can't be the same." 
             elif(entered_username not in All_Usernames):
                 Validation_error="User not found." 
             return Validation_error    
@@ -315,7 +308,7 @@ def Send_Money(Current_balance,this_username,Balance_label,Account_Balance):
     Button_Frame=tkinter.LabelFrame(Send_Money_window,bg="black",  relief="flat") 
     Button_Frame.grid(row=5,column=0 ,padx=20,pady=10)
 
-    Username_name_label=tkinter.Label(Send_Money_frame,font=Other_labels_font,text="Reciever Username")   #(this is one of the contained labels)
+    Username_name_label=tkinter.Label(Send_Money_frame,font=Other_labels_font,text="Receiver Username")   #(this is one of the contained labels)
     Username_name_label.grid(row=1,column=0, pady=10, ipady=5)
 
     Username_name_entry=tkinter.Entry(Send_Money_frame,font=Entry_label_font, bg="white",fg="gray", width=25)
@@ -359,8 +352,8 @@ def Send_Money(Current_balance,this_username,Balance_label,Account_Balance):
 
 #Send Money Function Ends --------------------------------------------------------------------------------------------------------  
 
-#Recieve Money Function Starts --------------------------------------------------------------------------------------------------------  
-def Recieve_Money(my_Username,Balance_label,Account_Balance):
+#Receive Money Function Starts --------------------------------------------------------------------------------------------------------  
+def Receive_Money(my_Username,Balance_label,Account_Balance):
     Upload_QR_Code =tkinter.Tk()
     Upload_QR_Code.title("QR code selector")
     Upload_QR_Code.config(bg="black")
@@ -399,4 +392,4 @@ def Recieve_Money(my_Username,Balance_label,Account_Balance):
     Upload_QR_Code.deiconify()
 
     Upload_QR_Code.mainloop()
-#Recieve Money Function Ends --------------------------------------------------------------------------------------------------------  
+#Receive Money Function Ends --------------------------------------------------------------------------------------------------------  
