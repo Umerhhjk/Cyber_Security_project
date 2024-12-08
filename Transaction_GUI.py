@@ -56,6 +56,49 @@ Button_style_3 = {
 
 #Incomplete Functions -------------------------------------------------------------------------
 
+def display_on_screen(Sender_username,money_to_recieve,Message_to_display,QR_date):
+    display_on_screen_window = tkinter.Tk()
+    display_on_screen_window.title("QR code information") 
+    display_on_screen_window.geometry(f"470x500+{X_cord}+{Y_cord}") 
+    display_on_screen_window.config(bg="black")
+
+    username_display="Sender: "
+    username_display+=Sender_username
+
+    money_display="Amount: "
+    money_display+=str(money_to_recieve)
+
+    Message_display="Message: "
+    if(Message_to_display!=""):
+       Message_display+=Message_to_display
+    else:
+        Message_display+="[No message attached]"
+
+    time_display="Time of Generation: "
+    time_display+=QR_date
+
+    main_label=tkinter.Label(display_on_screen_window,font=Other_Headings_font, bg="black", fg="white" ,text="QR code information") 
+    main_label.grid(row=0,column=0,padx=(5,0),pady=(20,20))
+
+    display_on_screen_frame=tkinter.LabelFrame(display_on_screen_window) 
+    display_on_screen_frame.grid(row=1,column=0 ,padx=20,pady=10)
+
+    Username_name_label=tkinter.Label(display_on_screen_frame,font=Other_labels_font,text=username_display,bg="white", fg="black")
+    Username_name_label.grid(row=1,column=0, pady=10, ipady=5)
+
+    money_display=tkinter.Label(display_on_screen_frame,font=Other_labels_font,text=money_display,bg="white", fg="black")
+    money_display.grid(row=2,column=0, pady=10, ipady=5)
+
+    Message_display_label=tkinter.Label(display_on_screen_frame,font=Other_labels_font,text=Message_display,bg="white", fg="black")
+    Message_display_label.grid(row=3,column=0, pady=10, ipady=5)
+
+    time_display_label=tkinter.Label(display_on_screen_frame,font=Other_labels_font,text=time_display,bg="white", fg="black")
+    time_display_label.grid(row=4,column=0, pady=10, ipady=5)
+
+    back_button = tkinter.Button(display_on_screen_frame, bg="#901111", text="Got it",command=lambda: go_back(display_on_screen_window),**Button_style_2,**Basic_Button_style)
+    back_button.grid(row=5,column=0, padx=20, pady=(20,10)) 
+
+
 def RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,Reciever_Public_key):
     signature = f"{Username} {Amount} {Message} {Time_of_generation}"
     Username = encrypt(Reciever_Public_key, Username)
@@ -85,6 +128,22 @@ def RSA_decryption_msg(QR_name,QR_amount,QR_msg,Reciever_Private_key):
     QR_data_list.append(decrypt(Reciever_Private_key, QR_msg))
 
     return QR_data_list #this will be the deccrypted data
+
+def message_verification_and_display(Sender_username,money_to_recieve,Message_to_display,QR_date,QR_signature,Sender_public_key):
+    signature = f"{Sender_username} {money_to_recieve} {Message_to_display} {QR_date}"
+    this_signature=calculate_sha1(signature)
+   
+    if(QR_signature!=this_signature):
+        print("QR code data has been compromised!")
+        return 0
+    elif (is_QR_code_closed(QR_signature)):
+        print("QR code has been closed!")
+        return 0
+      
+    else:
+        display_on_screen(Sender_username,money_to_recieve,Message_to_display,QR_date)
+        close_QR_Code(QR_signature)
+        return 1
 
 
 
@@ -126,7 +185,7 @@ def get_data_from_QR(my_username,Sender_name,Balance_label,Account_Balance,QR_re
         elif "Message" in item:
             _, QR_msg = item.split(": ")
         elif "Date" in item:
-            _, QR_date = item.split (": ")
+             _, QR_date = item.split(": ")
         elif "Signature" in item:
             _, QR_signature = item.split(": ")
 
@@ -134,6 +193,7 @@ def get_data_from_QR(my_username,Sender_name,Balance_label,Account_Balance,QR_re
     all_users=get_All_Usernames()
     if ((Sender_name not in all_users) or my_username==Sender_name):
         print("Invalid Sender")
+        return "Error"
     else:    
         Sender_public_key=get_Public_key(Sender_name)
     Reciever_Private_key=get_Private_key(my_username)
@@ -141,15 +201,17 @@ def get_data_from_QR(my_username,Sender_name,Balance_label,Account_Balance,QR_re
     Transction_information=RSA_decryption_msg(QR_name,QR_amount,QR_msg,Reciever_Private_key) 
 
     Sender_username=Transction_information[0]
-
     money_to_recieve=int(Transction_information[1])
-    new_balance=Update_Account_Balance(my_username,money_to_recieve)
-    balance_text="(Account Balance: " + str(new_balance) + " Rs)"
-    Balance_label.config(text=balance_text)
-
     Message_to_display=Transction_information[2]
 
-    message_verification_with_hash(QR_signature,Sender_public_key,msg)
+    Qr_status=message_verification_and_display(Sender_username,money_to_recieve,Message_to_display,QR_date,QR_signature,Sender_public_key)
+
+    if(Qr_status==1):
+       new_balance=Update_Account_Balance(my_username,money_to_recieve)
+       balance_text="(Account Balance: " + str(new_balance) + " Rs)"
+       Balance_label.config(text=balance_text)
+
+
    
 
 #Incomplete Functions END-------------------------------------------------------------------------
@@ -175,7 +237,7 @@ def Complete_Transaction(Entered_data,Current_User,Balance_label,Account_Balance
        Message=Message + Entered_data[2]
     Reciever_Public_key=get_Public_key(Entered_data[0])
 
-    qr_file_path=get_QR_File_path(Current_User)
+    qr_file_path=get_QR_File_path(Username)
     QR_code_Data=RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,Reciever_Public_key)
     Generate_QR_Code(QR_code_Data,qr_file_path)
 
@@ -325,8 +387,11 @@ def Recieve_Money(my_Username,Balance_label,Account_Balance):
 
     def Submit_data_clicked():
         Sender_name =Sender_name_entry.get()
-        get_data_from_QR(my_Username,Sender_name,Balance_label,Account_Balance,file_path)
-        Upload_QR_Code.withdraw()
+        if(get_data_from_QR(my_Username,Sender_name,Balance_label,Account_Balance,file_path)!="Error"):
+           Upload_QR_Code.withdraw()
+        else:
+            Sender_name_label.config(fg="red")
+
 
 
     Submit_Data_button = tkinter.Button(Upload_QR_Code, bg="#13780a" , text="Confirm\nChoice",command=Submit_data_clicked, **Button_style_2,**Basic_Button_style)

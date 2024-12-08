@@ -9,6 +9,7 @@ from datetime import datetime
 current_directory = os.path.dirname(__file__)  # Making sure the file is always created in the same folder with the program
 file_path = os.path.join(current_directory, 'User_data.txt')
 key_file_path= os.path.join(current_directory, 'key.txt')
+Qr_file_path=os.path.join(current_directory, 'Closed_QR_codes.txt')
 
 def list_to_strings(Plain_Text):
   string_text=""
@@ -97,7 +98,7 @@ def Create_Account(Account_data):
   Username = Account_data[0]
   Email    = Account_data[1]
   Password = hash_Password(Account_data[2])
-  Account_balance = 0
+  Account_balance = 5000     #To oepn an account, you must have atleast 5000 rupees, assuming this money has been deposited in the account
   Account_id=int(get_Last_ID())+1
   
   full_directory_path = os.path.join(current_directory, "CY_Project_USERS")
@@ -340,3 +341,25 @@ def check_old_password(Username,entered_password):
         i=i+1  
      print("Error Fetching the password")
      return -1
+
+
+#-----------------------------------------------------------
+
+def is_QR_code_closed(signature):
+   
+   with open(Qr_file_path, 'r') as file:
+    for line in file:
+       line=line.strip()
+       if(line==signature):
+          return True
+    return False   
+
+def close_QR_Code(signature):
+   if(is_QR_code_closed(signature)):
+      return 1
+   else:
+      with open(Qr_file_path, 'a') as file:
+         signature+='\n'
+         file.write(signature)
+         return 1
+      return 0
