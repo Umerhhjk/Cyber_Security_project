@@ -1,3 +1,6 @@
+# pip install opencv-python 
+# pip install qrcode (install these 2 if you havent already)
+
 import cv2
 import qrcode
 

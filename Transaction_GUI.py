@@ -4,6 +4,8 @@ import tkinter
 from datetime import datetime
 from tkinter import filedialog
 
+from PIL import Image, ImageTk
+
 import qr_code
 from Filing_logic import *
 from rsa import *
@@ -54,6 +56,49 @@ Button_style_3 = {
 
 #Incomplete Functions -------------------------------------------------------------------------
 
+def display_on_screen(Sender_username,money_to_recieve,Message_to_display,QR_date):
+    display_on_screen_window = tkinter.Tk()
+    display_on_screen_window.title("QR code information") 
+    display_on_screen_window.geometry(f"470x500+{X_cord}+{Y_cord}") 
+    display_on_screen_window.config(bg="black")
+
+    username_display="Sender: "
+    username_display+=Sender_username
+
+    money_display="Amount: "
+    money_display+=str(money_to_recieve)
+
+    Message_display="Message: "
+    if(Message_to_display!=""):
+       Message_display+=Message_to_display
+    else:
+        Message_display+="[No message attached]"
+
+    time_display="Time of Generation: "
+    time_display+=QR_date
+
+    main_label=tkinter.Label(display_on_screen_window,font=Other_Headings_font, bg="black", fg="white" ,text="QR code information") 
+    main_label.grid(row=0,column=0,padx=(5,0),pady=(20,20))
+
+    display_on_screen_frame=tkinter.LabelFrame(display_on_screen_window) 
+    display_on_screen_frame.grid(row=1,column=0 ,padx=20,pady=10)
+
+    Username_name_label=tkinter.Label(display_on_screen_frame,font=Other_labels_font,text=username_display,bg="white", fg="black")
+    Username_name_label.grid(row=1,column=0, pady=10, ipady=5)
+
+    money_display=tkinter.Label(display_on_screen_frame,font=Other_labels_font,text=money_display,bg="white", fg="black")
+    money_display.grid(row=2,column=0, pady=10, ipady=5)
+
+    Message_display_label=tkinter.Label(display_on_screen_frame,font=Other_labels_font,text=Message_display,bg="white", fg="black")
+    Message_display_label.grid(row=3,column=0, pady=10, ipady=5)
+
+    time_display_label=tkinter.Label(display_on_screen_frame,font=Other_labels_font,text=time_display,bg="white", fg="black")
+    time_display_label.grid(row=4,column=0, pady=10, ipady=5)
+
+    back_button = tkinter.Button(display_on_screen_frame, bg="#901111", text="Got it",command=lambda: go_back(display_on_screen_window),**Button_style_2,**Basic_Button_style)
+    back_button.grid(row=5,column=0, padx=20, pady=(20,10)) 
+
+
 def RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,Reciever_Public_key):
     signature = f"{Username} {Amount} {Message} {Time_of_generation}"
     Username = encrypt(Reciever_Public_key, Username)
@@ -63,48 +108,111 @@ def RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,R
     temporary_testing_list=[Username, Amount, Message, Time_of_generation, HASH_of_MSG]
     return temporary_testing_list
 
-def RSA_decryption_and_message_verification_with_hash(QR_data_list,Sender_public_key,Reciever_Private_key):
+def RSA_decryption_msg(QR_name,QR_amount,QR_msg,Reciever_Private_key):
+    QR_data_list=[]
+
+    QR_name = QR_name.strip("[]")
+    QR_name = QR_name.split(", ")
+    QR_name = [int(num) for num in QR_name]
+    
+    QR_amount = QR_amount.strip("[]")
+    QR_amount = QR_amount.split(", ")
+    QR_amount = [int(num) for num in QR_amount]
+    
+    QR_msg = QR_msg.strip("[]")
+    QR_msg = QR_msg.split(", ")
+    QR_msg = [int(num) for num in QR_msg]
+    
+    QR_data_list.append(decrypt(Reciever_Private_key, QR_name))
+    QR_data_list.append(decrypt(Reciever_Private_key, QR_amount))
+    QR_data_list.append(decrypt(Reciever_Private_key, QR_msg))
+
     return QR_data_list #this will be the deccrypted data
 
+def message_verification_and_display(Sender_username,money_to_recieve,Message_to_display,QR_date,QR_signature,Sender_public_key):
+    signature = f"{Sender_username} {money_to_recieve} {Message_to_display} {QR_date}"
+    this_signature=calculate_sha1(signature)
+   
+    if(QR_signature!=this_signature):
+        print("QR code data has been compromised!")
+        return 0
+    elif (is_QR_code_closed(QR_signature)):
+        print("QR code has been closed!")
+        return 0
+      
+    else:
+        display_on_screen(Sender_username,money_to_recieve,Message_to_display,QR_date)
+        close_QR_Code(QR_signature)
+        return 1
 
 
-def Generate_QR_Code(QR_code_Data):  
+
+def Generate_QR_Code(QR_code_Data,qr_file_path):  
 
     #code to generate the QR code here, it should save the QR code in the same folder, and display in the window below made here
     qrCodes = qr_code.generate_qr_code(QR_code_Data[0],QR_code_Data[1],QR_code_Data[2],QR_code_Data[3],QR_code_Data[4])
-    #qrCodes.save("filepath")
+    qrCodes.save(qr_file_path)
+    img = Image.open(qr_file_path)
+    img = img.resize((465, 475))
     Generate_QR_Code_Window = tkinter.Tk()
     Generate_QR_Code_Window.title("Generated QR Code")
+    Generate_QR_Code_Window.geometry(f"{img.width}x{img.height}+{X_cord}+{Y_cord}")
+
+    tk_image= ImageTk.PhotoImage(master=Generate_QR_Code_Window, image=img)
+    canvas = tkinter.Canvas(Generate_QR_Code_Window, width=img.width, height=img.height)
+    canvas.pack()
+    canvas.create_image(0, 0, anchor="nw", image=tk_image)
+    canvas.image = tk_image # Keeping a reference to the image to prevent it from being lost in the next loop
     Generate_QR_Code_Window.mainloop()
 
 
-def get_data_from_QR(my_username,Balance_label,Account_Balance,QR_received=None,QR_window=None):  #QR_received is the image from which we exctract data from
-    if(QR_window is not None):
-       QR_window.destroy() 
-    #rest of the code here
-    #QR_data_list=qr_code.read_qr_code("image_path") 
-    #this will have a list of strings, each string is a data from the QR code. 
-    #run qr_code.py to see the format it will be.
+def get_data_from_QR(my_username,Sender_name,Balance_label,Account_Balance,QR_received=None):  #QR_received is the image from which we exctract data from
+   
 
-    Sender_username="" #change this to actual sender's username (we get that from QR_data_list)
+    QR_data_list=qr_code.read_qr_code(QR_received) 
+    QR_name = None
+    QR_amount = None
+    QR_msg = None
+    QR_date = None
+    QR_signature = None # Regular expression pattern to extract lists of numbers:  [(extracted num)]
+    
+    # Iterate over each string in the list
+    for item in QR_data_list:
+        if "Sender's Name:" in item:
+            _, QR_name = item.split(": ") # if item is a list of RSA encrypted integers, add it to this list.
+        elif "Amount" in item:
+            _, QR_amount = item.split(": ")
+        elif "Message" in item:
+            _, QR_msg = item.split(": ")
+        elif "Date" in item:
+             _, QR_date = item.split(": ")
+        elif "Signature" in item:
+            _, QR_signature = item.split(": ")
 
-    Sender_public_key=get_Private_key(Sender_username)     #when keys are extracted, they will be in encrypted form
+            
+    all_users=get_All_Usernames()
+    if ((Sender_name not in all_users) or my_username==Sender_name):
+        print("Invalid Sender")
+        return "Error"
+    else:    
+        Sender_public_key=get_Public_key(Sender_name)
     Reciever_Private_key=get_Private_key(my_username)
-    
 
-    Transction_information=RSA_decryption_and_message_verification_with_hash(QR_data_list,Sender_public_key,Reciever_Private_key) 
+    Transction_information=RSA_decryption_msg(QR_name,QR_amount,QR_msg,Reciever_Private_key) 
 
-    #money_to_recieve=Transction_information[2]
+    Sender_username=Transction_information[0]
+    money_to_recieve=int(Transction_information[1])
+    Message_to_display=Transction_information[2]
 
-    #using this instead of the commented out line above, for testing purposes only
-    money_to_recieve=100
-    new_balance=Update_Account_Balance(my_username,money_to_recieve)
-    balance_text="(Account Balance: " + str(new_balance) + " Rs)"
-    Balance_label.config(text=balance_text)
-    
-    
+    Qr_status=message_verification_and_display(Sender_username,money_to_recieve,Message_to_display,QR_date,QR_signature,Sender_public_key)
 
-    
+    if(Qr_status==1):
+       new_balance=Update_Account_Balance(my_username,money_to_recieve)
+       balance_text="(Account Balance: " + str(new_balance) + " Rs)"
+       Balance_label.config(text=balance_text)
+
+
+   
 
 #Incomplete Functions END-------------------------------------------------------------------------
 
@@ -127,12 +235,11 @@ def Complete_Transaction(Entered_data,Current_User,Balance_label,Account_Balance
         Message=Message + "No Additional Message"
     else:    
        Message=Message + Entered_data[2]
-     #when keys are extracted, they will be in encrypted form
     Reciever_Public_key=get_Public_key(Entered_data[0])
 
-
+    qr_file_path=get_QR_File_path(Username)
     QR_code_Data=RSA_Encryption_and_message_hash(Username,Amount,Message,Time_of_generation,Reciever_Public_key)
-    Generate_QR_Code(QR_code_Data)
+    Generate_QR_Code(QR_code_Data,qr_file_path)
 
 
 
@@ -257,7 +364,7 @@ def Recieve_Money(my_Username,Balance_label,Account_Balance):
     Upload_QR_Code =tkinter.Tk()
     Upload_QR_Code.title("QR code selector")
     Upload_QR_Code.config(bg="black")
-    Upload_QR_Code.geometry(f"570x480+{X_cord}+{Y_cord}")
+    Upload_QR_Code.geometry(f"465x600+{X_cord}+{Y_cord}")
     Upload_QR_Code.withdraw()
 
 
@@ -265,20 +372,31 @@ def Recieve_Money(my_Username,Balance_label,Account_Balance):
     label =tkinter.Label(Upload_QR_Code)
     label.pack(pady=20,padx=(10,10))
 
-    #############################################  COMMENTED OUT BECAUSE CANT USE TILL WE HAVE AN ACTUAL QR CODE #############################################
-
-    if file_path:
-    #     QR_received = Image.open(file_path)
-    
-    #     QR_received_tk = ImageTk.PhotoImage(QR_received)
-    #     label.config(image=QR_received_tk)
-    #     label.image = QR_received_tk
+    img = Image.open(file_path)
+    img = img.resize((300, 300)) #resizing to display nicely
+    QR_received_tk = ImageTk.PhotoImage(master=Upload_QR_Code, image=img)
+    label.config(image=QR_received_tk)
+    label.image = QR_received_tk
 
 
-        QR_received=None #REMOVE THIS, ONLY HERE FOR TESTING
-        Submit_Data_button = tkinter.Button(Upload_QR_Code, bg="#13780a" , text="Confirm\nChoice",command=lambda: get_data_from_QR(my_Username,Balance_label,Account_Balance,QR_received,Upload_QR_Code), **Button_style_2,**Basic_Button_style)
-        Submit_Data_button.pack(pady=(20,10),padx=(10,10)) 
-        Upload_QR_Code.deiconify()
+    Sender_name_label = tkinter.Label(Upload_QR_Code,font=Other_labels_font,bg="black",fg="white",text="Enter Sender's Username:-")
+    Sender_name_label.pack(pady=(20,10),padx=(10,10))
+
+    Sender_name_entry = tkinter.Entry(Upload_QR_Code, font=Entry_label_font, bg="white",fg="gray", width=25)
+    Sender_name_entry.pack(pady=(0,10),padx=(10,10))
+
+    def Submit_data_clicked():
+        Sender_name =Sender_name_entry.get()
+        if(get_data_from_QR(my_Username,Sender_name,Balance_label,Account_Balance,file_path)!="Error"):
+           Upload_QR_Code.withdraw()
+        else:
+            Sender_name_label.config(fg="red")
+
+
+
+    Submit_Data_button = tkinter.Button(Upload_QR_Code, bg="#13780a" , text="Confirm\nChoice",command=Submit_data_clicked, **Button_style_2,**Basic_Button_style)
+    Submit_Data_button.pack(pady=(20,10),padx=(10,10)) 
+    Upload_QR_Code.deiconify()
 
     Upload_QR_Code.mainloop()
 #Recieve Money Function Ends --------------------------------------------------------------------------------------------------------  
