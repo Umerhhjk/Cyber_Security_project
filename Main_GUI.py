@@ -72,12 +72,12 @@ def Validate_Passwod_data(Entered_data,This_username):
         return Validation_error 
 
     NewPasswordError= Validade_new_Password()
-    if(NewPasswordError == None):
+    if(NewPasswordError is None):
        Old_Password_check=check_old_password(This_username,Old_Password)
        if(Old_Password_check!=1):
            return "Invalid Password."
        
-    elif(NewPasswordError != None):
+    elif(NewPasswordError is not None):
         return NewPasswordError
 
     else:
@@ -131,7 +131,7 @@ def Change_Password(This_username):
         ]
         error_text=Validate_Passwod_data(Entered_data,This_username)
         Error_label.config(text=error_text)   #if there is an error, display it
-        if(error_text=="" or error_text==None):
+        if(error_text=="" or error_text is None):
             Change_Password_window.destroy()
             print("Password Change Successful")
             Update_Password(This_username,Entered_data[1]) 
