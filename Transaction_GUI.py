@@ -68,7 +68,7 @@ def display_on_screen(Sender_username,money_to_recieve,Message_to_display,QR_dat
     money_display="Amount: "
     money_display+=str(money_to_recieve)
 
-    Message_display="Message: "
+    Message_display=""
     if(Message_to_display!=""):
        Message_display+=Message_to_display
     else:
